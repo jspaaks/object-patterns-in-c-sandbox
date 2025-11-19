@@ -4,6 +4,7 @@ project(mbm LANGUAGES C)
 
 option(MBM_APP_WITH_ASAN "Whether to enable address sanitizing for executable 'mbm'" OFF)
 option(MBM_LIB_WITH_ASAN "Whether to enable address sanitizing for library 'mbm'" OFF)
+option(MBM_USE_VENDORED_SDL3 "Whether to use SDL3 from vendored or system" ON)
 
 include(CTest)
 include(GenerateExportHeader)
@@ -23,6 +24,13 @@ if (PROJECT_IS_TOP_LEVEL)
 else()
     # I'm not the top-most project, set MBM_BUILD_TESTING default OFF
     option(MBM_BUILD_TESTING "Whether to build the libmbm tests" OFF)
+endif()
+
+if (MBM_USE_VENDORED_SDL3)
+    add_subdirectory(third_party/SDL EXCLUDE_FROM_ALL)
+    install(TARGETS SDL3-shared)
+else()
+    find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
 endif()
 
 add_subdirectory(assets)

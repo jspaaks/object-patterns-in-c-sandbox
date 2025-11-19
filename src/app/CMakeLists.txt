@@ -31,6 +31,7 @@ target_include_directories(
     tgt_exe_mbm
     PRIVATE
         ../../include
+        ../../third_party/SDL/include
 )
 
 target_link_libraries(
@@ -38,6 +39,7 @@ target_link_libraries(
     PRIVATE
         m
         tgt_lib_mbm
+        SDL3::SDL3
 )
 
 target_link_options(
