@@ -58,6 +58,7 @@ target_sources(
     tgt_lib_mbm
     PRIVATE
         balloon.c
+        scene.c
         spritesheet.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
@@ -67,6 +68,7 @@ target_sources(
                 ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
             FILES
                 ../../include/mbm/balloon.h
+                ../../include/mbm/scene.h
                 ../../include/mbm/spritesheet.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )
