@@ -10,6 +10,8 @@
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
 static Spritesheet * spritesheet = nullptr;
+static Balloon * balloon = nullptr;
+
 static int texture_width = 0;
 static int texture_height = 0;
 
@@ -60,9 +62,7 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
         spritesheet = spritesheet_new();
         spritesheet_init();
 
-        Balloon * balloon = balloon_new();
-        //balloon_print(balloon, "balloon");
-        balloon_delete(&balloon);
+        balloon = balloon_new();
     }
 
     // continue with the rest of the program
@@ -117,4 +117,7 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
 void SDL_AppQuit(void * appstate, SDL_AppResult result) {
     //SDL_DestroyTexture(texture);
     /* SDL will clean up the window/renderer for us. */
+    balloon_delete(&balloon);
+    spritesheet_deinit();
+    spritesheet_delete(&spritesheet);
 }
