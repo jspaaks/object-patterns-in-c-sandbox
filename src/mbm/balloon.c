@@ -14,17 +14,14 @@ struct balloon {
     SDL_FRect sim;
 };
 
-// declare properties of `struct balloon_shared`
-struct balloon_shared {
-    SDL_Rect src;
-    SDL_Texture * texture;
-};
+//// declare properties of `struct balloon_shared`
+//struct balloon_shared {
+//    SDL_Rect src;
+//    SDL_Texture * texture;
+//};
 
-// define properties of `struct balloon_shared`
-static struct balloon_shared shared = {
-    .src = {},
-    .texture = nullptr,
-};
+//// define properties of `struct balloon_shared`
+//static struct balloon_shared shared = {};
 
 void balloon_delete (struct balloon ** self) {
     free(*self);
