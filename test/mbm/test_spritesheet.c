@@ -3,25 +3,24 @@
 #include <criterion/criterion.h>
 #include <stddef.h>
 
-
 Spritesheet * spritesheet = nullptr;
 
 void spritesheet_setup (void) {
     spritesheet = spritesheet_new();
+    spritesheet_init();
 }
 
 void spritesheet_teardown(void) {
+    spritesheet_deinit();
     spritesheet_delete(&spritesheet);
 }
 
 Test (Spritesheet, test_get_path, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    spritesheet_init();
     const char * actual = spritesheet_get_path();
     cr_assert(actual != nullptr);
 }
 
 Test (Spritesheet, test_get_rect_balloon_orange, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    spritesheet_init();
     const SDL_Rect actual = spritesheet_get_rect_balloon_orange();
     const SDL_Rect expected = (SDL_Rect) {
         .h = 12,
@@ -45,7 +44,6 @@ Test (Spritesheet, test_get_rect_balloon_orange, .init=spritesheet_setup, .fini=
 }
 
 Test (Spritesheet, test_get_rect_balloon_red, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    spritesheet_init();
     const SDL_Rect actual = spritesheet_get_rect_balloon_red();
     const SDL_Rect expected = (SDL_Rect) {
         .h = 8,
@@ -69,7 +67,6 @@ Test (Spritesheet, test_get_rect_balloon_red, .init=spritesheet_setup, .fini=spr
 }
 
 Test (Spritesheet, test_get_rect_balloon_yellow, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    spritesheet_init();
     const SDL_Rect actual = spritesheet_get_rect_balloon_yellow();
     const SDL_Rect expected = (SDL_Rect) {
         .h = 16,
@@ -90,4 +87,10 @@ Test (Spritesheet, test_get_rect_balloon_yellow, .init=spritesheet_setup, .fini=
     cr_assert(actual.y == expected.y,
               "%s: actual y (%d) not equal to expected y (%d)",
               subject, actual.y, expected.y);
+}
+
+Test (Spritesheet, test_new, .init=spritesheet_setup, .fini=spritesheet_teardown) {
+    Spritesheet * again = spritesheet_new();
+    cr_assert(spritesheet == again,
+              "spritesheet instantiation should only allow a single instance");
 }
