@@ -5,10 +5,10 @@ set_property(TARGET tgt_lib_mbm PROPERTY OUTPUT_NAME mbm)
 
 generate_export_header(
     tgt_lib_mbm
-    BASE_NAME mbm_balloon
-    EXPORT_MACRO_NAME MBM_BALLOON_ABI
-    NO_EXPORT_MACRO_NAME MBM_BALLOON_NO_ABI
-    EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/mbm/balloon_abi.h
+    BASE_NAME mbm
+    EXPORT_MACRO_NAME MBM_ABI
+    NO_EXPORT_MACRO_NAME MBM_NO_ABI
+    EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/include/mbm/abi.h
 )
 
 target_compile_definitions(
@@ -40,7 +40,7 @@ target_include_directories(
     tgt_lib_mbm
     PRIVATE
         ../../include
-        ../../third_party/their/include
+        ../../third_party/SDL/include
 )
 
 target_link_libraries(
@@ -58,6 +58,7 @@ target_sources(
     tgt_lib_mbm
     PRIVATE
         balloon.c
+        spritesheet.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
             TYPE HEADERS
@@ -66,7 +67,8 @@ target_sources(
                 ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
             FILES
                 ../../include/mbm/balloon.h
-                ${CMAKE_BINARY_DIR}/include/mbm/balloon_abi.h  # cmake-generated file
+                ../../include/mbm/spritesheet.h
+                ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )
 
 install(TARGETS tgt_lib_mbm
