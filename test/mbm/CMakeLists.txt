@@ -30,6 +30,7 @@ target_include_directories(
     tgt_exe_test_mbm
     PRIVATE
         ../include
+        ../../third_party/SDL/include
 )
 
 target_link_libraries(
@@ -37,6 +38,7 @@ target_link_libraries(
     PRIVATE
         criterion
         tgt_lib_mbm
+        SDL3::SDL3
 )
 
 target_link_options(
@@ -49,6 +51,7 @@ target_sources(
     tgt_exe_test_mbm
     PRIVATE
         test_balloon.c
+        test_spritesheet.c
 )
 
 add_test(
