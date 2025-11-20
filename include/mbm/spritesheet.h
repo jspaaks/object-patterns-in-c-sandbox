@@ -5,14 +5,15 @@
 #include "SDL3/SDL_rect.h"
 #include <stddef.h>
 
-
 // `struct spritesheet` is an opaque data structure
 struct spritesheet;
 
-// define an alias for struct spritesheet
+// define `Spritesheet` as an alias for `struct spritesheet`
 typedef struct spritesheet Spritesheet;
 
-MBM_ABI void spritesheet_delete (struct spritesheet ** self);
+// forward function declarations
+MBM_ABI void spritesheet_deinit (void);
+MBM_ABI void spritesheet_delete (struct spritesheet ** spritesheet);
 MBM_ABI SDL_Rect spritesheet_get_rect_balloon_orange (void);
 MBM_ABI SDL_Rect spritesheet_get_rect_balloon_red (void);
 MBM_ABI SDL_Rect spritesheet_get_rect_balloon_yellow (void);
