@@ -1,33 +1,29 @@
 #include "mbm/balloon.h"
-#include "mbm/timing.h"
+#include "mbm/spritesheet.h"
+#include "SDL3/SDL_rect.h"
+#include "SDL3/SDL_render.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// `struct balloon` is an opaque data structure
+// declare properties of `struct balloon`
 struct balloon {
-    float h;
     float u;
     float v;
-    float w;
-    float x;
-    float y;
-    int n;
-    struct shared * shared;
+    SDL_FRect sim;
 };
 
-// define static properties of `struct balloon`
-static struct shared {
-    int h_src;
-    int w_src;
-    int x_src;
-    int y_src;
-} shared = {
-    .h_src = 12,
-    .w_src = 9,
-    .x_src = 184,
-    .y_src = 1
+// declare properties of `struct balloon_shared`
+struct balloon_shared {
+    SDL_Rect src;
+    SDL_Texture * texture;
+};
+
+// define properties of `struct balloon_shared`
+static struct balloon_shared shared = {
+    .src = {},
+    .texture = nullptr,
 };
 
 void balloon_delete (struct balloon ** self) {
@@ -35,27 +31,31 @@ void balloon_delete (struct balloon ** self) {
     *self = nullptr;
 }
 
-int balloon_get_n (struct balloon * self) {
-    return self->n;
+SDL_FRect balloon_get_sim (struct balloon * self) {
+    return self->sim;
 }
 
-size_t balloon_get_size (void) {
+size_t balloon_memsize (void) {
     return sizeof(struct balloon);
 }
 
-void balloon_increment_n (struct balloon * self) {
-    self->n++;
-}
-
 void balloon_init (struct balloon * self) {
-    self->h = 0.0;
-    self->n = 0.0;
-    self->shared = &shared;
+    self->sim = (SDL_FRect) {
+        .h = 12.0,
+        .w = 9.0,
+        .x = 30.0,
+        .y = 40.0,
+    };
     self->u = 0.0;
     self->v = -30.0;
-    self->w = 0.0;
-    self->x = 0.0;
-    self->y = 0.0;
+
+    //shared.texture = SDL_CreateTextureFromSurface(renderer, surface);
+    //if (shared.texture == nullptr) {
+    //    SDL_Log("Couldn't create static texture: %s", SDL_GetError());
+    //    return SDL_APP_FAILURE;
+    //}
+    //SDL_DestroySurface(surface);
+
 }
 
 struct balloon * balloon_new (void) {
@@ -65,45 +65,4 @@ struct balloon * balloon_new (void) {
         exit(1);
     }
     return p;
-}
-
-void balloon_print (struct balloon * self, const char * name) {
-    static const char * name_default = "Untitled balloon";
-    if (name == nullptr) {
-        name = name_default;
-    }
-    fprintf(stdout,
-            "%s (Balloon@%p): {\n"
-            "  .h = %.3f\n"
-            "  .n = %d\n"
-            "  .shared@%p: {\n"
-            "    .h_src = %d\n"
-            "    .w_src = %d\n"
-            "    .x_src = %d\n"
-            "    .y_src = %d\n"
-            "  }\n"
-            "  .u = %.3f\n"
-            "  .v = %.3f\n"
-            "  .w = %.3f\n"
-            "  .x = %.3f\n"
-            "  .y = %.3f\n"
-            "}\n",
-            name, (void *) self,
-            self->h,
-            self->n,
-            (void *) self->shared,
-            self->shared->h_src,
-            self->shared->w_src,
-            self->shared->x_src,
-            self->shared->y_src,
-            self->u,
-            self->v,
-            self->w,
-            self->x,
-            self->y);
-}
-
-void balloon_update_pos (struct balloon * self, const struct timing * timing) {
-    self->x += self->u * timing->dt.frame;
-    self->y += self->v * timing->dt.frame;
 }
