@@ -3,16 +3,14 @@
 #include <criterion/criterion.h>
 #include <stddef.h>
 
-Spritesheet * spritesheet = nullptr;
-
 void spritesheet_setup (void) {
-    spritesheet = spritesheet_new();
+    spritesheet_new();
     spritesheet_init();
 }
 
 void spritesheet_teardown(void) {
     spritesheet_deinit();
-    spritesheet_delete(&spritesheet);
+    spritesheet_delete();
 }
 
 Test (Spritesheet, test_get_path, .init=spritesheet_setup, .fini=spritesheet_teardown) {
@@ -87,10 +85,4 @@ Test (Spritesheet, test_get_rect_balloon_yellow, .init=spritesheet_setup, .fini=
     cr_assert(actual.y == expected.y,
               "%s: actual y (%d) not equal to expected y (%d)",
               subject, actual.y, expected.y);
-}
-
-Test (Spritesheet, test_new, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    Spritesheet * again = spritesheet_new();
-    cr_assert(spritesheet == again,
-              "spritesheet instantiation should only allow a single instance");
 }

@@ -31,13 +31,10 @@ struct spritesheet {
 // define pointer to singleton instance of `struct singleton`
 static struct spritesheet * spritesheet = nullptr;
 
-void spritesheet_deinit (void) {
+void spritesheet_delete (void) {
     SDL_free(spritesheet->path);
-}
-
-void spritesheet_delete (struct spritesheet ** spritesheet) {
-    free(*spritesheet);
-    *spritesheet = nullptr;
+    free(spritesheet);
+    spritesheet = nullptr;
 }
 
 SDL_Rect spritesheet_get_rect_balloon_orange (void) {
@@ -128,15 +125,15 @@ void spritesheet_init (void) {
     }
 }
 
-struct spritesheet * spritesheet_new (void) {
+void spritesheet_new (void) {
     if (spritesheet != nullptr) {
-        // return a pointer to existing singleton instance of spritesheet
-        return spritesheet;
+        // memory has already been allocated for `spritesheet`, and `spritesheet` is singleton
+        return;
     }
     spritesheet = (struct spritesheet *) calloc(1, sizeof(struct spritesheet));
     if (spritesheet == nullptr) {
         fprintf(stderr, "ERROR allocating dynamic memory for struct spritesheet, aborting.\n");
         exit(1);
     }
-    return spritesheet;
+    return;
 }
