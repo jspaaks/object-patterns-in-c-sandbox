@@ -11,7 +11,6 @@ struct balloon;
 // define `Balloon` as an alias for `struct balloon`
 typedef struct balloon Balloon;
 
-// forward function declarations
 MBM_ABI void balloon_delete (struct balloon ** self);
 MBM_ABI SDL_FRect balloon_get_sim (struct balloon * self);
 MBM_ABI size_t balloon_memsize (void);
