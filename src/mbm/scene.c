@@ -35,41 +35,60 @@ void scene_draw (struct scene * self) {
 }
 
 void scene_update (struct scene * self) {
-    int w = -1;
     int h = -1;
+    int w = -1;
     SDL_GetWindowSize(self->window, &w, &h);
 
-    //int ratio = h / w;
-    //if (ratio < self->ratio) {
-    //} else {
-    //}
-
-    self->tgt = (SDL_FRect) {
-        .h = h - 20,
-        .w = w - 20,
-        .x = 10,
-        .y = 10,
-    };
+    float ratio = (float) w / h;
+    if (ratio < self->ratio) {
+        // too tall
+        float scale = (float) w / self->sim.w;
+        float h0 = scale * self->sim.w / self->ratio;
+        self->tgt = (SDL_FRect) {
+            .h = h0,
+            .w = scale * self->sim.w,
+            .x = 0,
+            .y = ((float) h - h0) / 2,
+        };
+    } else {
+        // too wide
+        float scale = (float) h / self->sim.h;
+        float w0 = scale * self->sim.h * self->ratio;
+        self->tgt = (SDL_FRect) {
+            .h = scale * self->sim.h,
+            .w = w0,
+            .x = ((float) w - w0) / 2,
+            .y = 0,
+        };
+    }
 }
 
 void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * renderer) {
-    self->color = (SDL_Color) {
-        .r = 128,
-        .g = 0,
-        .b = 128,
-        .a = SDL_ALPHA_OPAQUE,
-    };
     int h = 720;
     int w = 1024;
-    self->ratio = (float) w / h;
-    self->sim = (SDL_FRect) {
-        .h = h,
-        .w = w,
-        .x = 0,
-        .y = 0,
+    *self = (struct scene) {
+        .color = (SDL_Color) {
+            .r = 0,
+            .g = 22,
+            .b = 43,
+            .a = SDL_ALPHA_OPAQUE,
+        },
+        .ratio = (float) w / h,
+        .renderer = renderer,
+        .sim = (SDL_FRect) {
+            .h = h,
+            .w = w,
+            .x = 0,
+            .y = 0,
+        },
+        .tgt = (SDL_FRect) {
+            .h = h,
+            .w = w,
+            .x = 0,
+            .y = 0,
+        },
+        .window = window,
     };
-    self->renderer = renderer;
-    self->window = window;
 }
 
 struct scene * scene_new (void) {
