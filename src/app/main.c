@@ -11,6 +11,8 @@
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
 static Balloon * balloon = nullptr;
+static Scene * scene = nullptr;
+static Spritesheet * spritesheet = nullptr;
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -54,11 +56,11 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
     }
 
     // load the spritesheet from file
-    spritesheet_new();
-    spritesheet_init();
+    spritesheet = spritesheet_new();
+    spritesheet_init(spritesheet);
 
-    scene_new();
-    scene_init(window, renderer);
+    scene = scene_new();
+    scene_init(scene, window, renderer);
 
     balloon = balloon_new();
 
@@ -70,14 +72,14 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 // `SDL_AppIterate` runs once per frame, and is the heart of the program
 SDL_AppResult SDL_AppIterate(void * appstate) {
 
-    scene_update();
+    scene_update(scene);
 
     // clear the screen
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
     // draw the scene
-    scene_draw();
+    scene_draw(scene);
 
     // update the screen with this frame's rendering
     SDL_RenderPresent(renderer);
@@ -91,6 +93,6 @@ void SDL_AppQuit(void * appstate, SDL_AppResult result) {
     //SDL_DestroyTexture(texture);
     /* SDL will clean up the window/renderer for us. */
     balloon_delete(&balloon);
-    scene_delete();
-    spritesheet_delete();
+    scene_delete(&scene);
+    spritesheet_delete(&spritesheet);
 }

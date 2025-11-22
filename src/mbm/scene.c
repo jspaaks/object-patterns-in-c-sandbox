@@ -20,35 +20,33 @@ struct scene {
 };
 
 // define pointer to singleton instance of `struct scene`
-static struct scene * scene = nullptr;
+static struct scene * scenep = nullptr;
 
-void scene_deinit (void) {}
-
-void scene_delete (void) {
-    free(scene);
-    scene = nullptr;
+void scene_delete (struct scene ** self) {
+    free(*self);
+    *self = nullptr;
 }
 
-SDL_FRect scene_get_rect_scene (void) {
-    return scene->rects.sim;
+SDL_FRect scene_get_rect_scene (struct scene * self) {
+    return self->rects.sim;
 }
 
-void scene_draw (void) {
-    SDL_SetRenderDrawColor(scene->renderer, scene->color.r, scene->color.g, scene->color.b, scene->color.a);
-    SDL_RenderFillRect(scene->renderer, &scene->rects.tgt);
+void scene_draw (struct scene * self) {
+    SDL_SetRenderDrawColor(self->renderer, self->color.r, self->color.g, self->color.b, self->color.a);
+    SDL_RenderFillRect(self->renderer, &self->rects.tgt);
 }
 
-void scene_update (void) {
+void scene_update (struct scene * self) {
     int w = -1;
     int h = -1;
-    SDL_GetWindowSize(scene->window, &w, &h);
+    SDL_GetWindowSize(self->window, &w, &h);
 
     //int ratio = h / w;
     //if (ratio < scene->ratio) {
     //} else {
     //}
 
-    scene->rects.tgt = (SDL_FRect) {
+    self->rects.tgt = (SDL_FRect) {
         .h = h - 20,
         .w = w - 20,
         .x = 10,
@@ -56,8 +54,8 @@ void scene_update (void) {
     };
 }
 
-void scene_init (SDL_Window * window, SDL_Renderer * renderer) {
-    scene->color = (SDL_Color) {
+void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * renderer) {
+    self->color = (SDL_Color) {
         .r = 128,
         .g = 0,
         .b = 128,
@@ -65,26 +63,26 @@ void scene_init (SDL_Window * window, SDL_Renderer * renderer) {
     };
     int h = 720;
     int w = 1024;
-    scene->ratio = (float) w / h;
-    scene->rects.sim = (SDL_FRect) {
+    self->ratio = (float) w / h;
+    self->rects.sim = (SDL_FRect) {
         .h = h,
         .w = w,
         .x = 0,
         .y = 0,
     };
-    scene->renderer = renderer;
-    scene->window = window;
+    self->renderer = renderer;
+    self->window = window;
 }
 
-void scene_new (void) {
-    if (scene != nullptr) {
+struct scene * scene_new (void) {
+    if (scenep != nullptr) {
         // memory has already been allocated for `scene`, and `scene` is singleton
-        return;
+        return scenep;
     }
-    scene = (struct scene *) calloc(1, sizeof(struct scene));
-    if (scene == nullptr) {
+    scenep = (struct scene *) calloc(1, sizeof(struct scene));
+    if (scenep == nullptr) {
         fprintf(stderr, "ERROR allocating dynamic memory for struct scene, aborting.\n");
         exit(1);
     }
-    return;
+    return scenep;
 }

@@ -3,23 +3,24 @@
 #include <criterion/criterion.h>
 #include <stddef.h>
 
+static Spritesheet * spritesheet = nullptr;
+
 void spritesheet_setup (void) {
-    spritesheet_new();
-    spritesheet_init();
+    spritesheet = spritesheet_new();
+    spritesheet_init(spritesheet);
 }
 
 void spritesheet_teardown(void) {
-    spritesheet_deinit();
-    spritesheet_delete();
+    spritesheet_delete(&spritesheet);
 }
 
 Test (Spritesheet, test_get_path, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    const char * actual = spritesheet_get_path();
+    const char * actual = spritesheet_get_path(spritesheet);
     cr_assert(actual != nullptr);
 }
 
 Test (Spritesheet, test_get_rect_balloon_orange, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    const SDL_Rect actual = spritesheet_get_rect_balloon_orange();
+    const SDL_Rect actual = spritesheet_get_rect_balloon_orange(spritesheet);
     const SDL_Rect expected = (SDL_Rect) {
         .h = 12,
         .w = 9,
@@ -42,7 +43,7 @@ Test (Spritesheet, test_get_rect_balloon_orange, .init=spritesheet_setup, .fini=
 }
 
 Test (Spritesheet, test_get_rect_balloon_red, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    const SDL_Rect actual = spritesheet_get_rect_balloon_red();
+    const SDL_Rect actual = spritesheet_get_rect_balloon_red(spritesheet);
     const SDL_Rect expected = (SDL_Rect) {
         .h = 8,
         .w = 6,
@@ -65,7 +66,7 @@ Test (Spritesheet, test_get_rect_balloon_red, .init=spritesheet_setup, .fini=spr
 }
 
 Test (Spritesheet, test_get_rect_balloon_yellow, .init=spritesheet_setup, .fini=spritesheet_teardown) {
-    const SDL_Rect actual = spritesheet_get_rect_balloon_yellow();
+    const SDL_Rect actual = spritesheet_get_rect_balloon_yellow(spritesheet);
     const SDL_Rect expected = (SDL_Rect) {
         .h = 16,
         .w = 12,

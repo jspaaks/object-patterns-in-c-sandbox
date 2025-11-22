@@ -3,7 +3,7 @@
 #include <criterion/criterion.h>
 #include <stddef.h>
 
-Balloon * balloon = nullptr;
+static Balloon * balloon = nullptr;
 
 void balloon_setup (void) {
     balloon = balloon_new();
