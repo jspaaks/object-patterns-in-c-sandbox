@@ -87,3 +87,10 @@ Test (Spritesheet, test_get_rect_balloon_yellow, .init=spritesheet_setup, .fini=
               "%s: actual y (%d) not equal to expected y (%d)",
               subject, actual.y, expected.y);
 }
+
+
+Test (Spritesheet, test_new, .init=spritesheet_setup, .fini=spritesheet_teardown) {
+    Spritesheet * again = spritesheet_new();
+    cr_assert(spritesheet == again,
+              "spritesheet instantiation should only allow a single instance");
+}

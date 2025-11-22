@@ -13,23 +13,21 @@
 struct spritesheet {
     char * path;
     struct {
-        struct {
-            SDL_Rect orange;
-            SDL_Rect red;
-            SDL_Rect yellow;
-        } balloon;
-        SDL_Rect barrel;
-        SDL_Rect bullet;
-        SDL_Rect collision;
-        SDL_Rect flash;
-        SDL_Rect moon;
-        SDL_Rect turret;
-    } rects;
+        SDL_Rect orange;
+        SDL_Rect red;
+        SDL_Rect yellow;
+    } balloon;
+    SDL_Rect barrel;
+    SDL_Rect bullet;
+    SDL_Rect collision;
+    SDL_Rect flash;
+    SDL_Rect moon;
+    SDL_Rect turret;
     SDL_Surface * surface;
 };
 
 // define pointer to singleton instance of `struct singleton`
-static struct spritesheet * spritesheet = nullptr;
+static struct spritesheet * singleton = nullptr;
 
 void spritesheet_delete (struct spritesheet ** self) {
     SDL_free((*self)->path);
@@ -38,15 +36,15 @@ void spritesheet_delete (struct spritesheet ** self) {
 }
 
 SDL_Rect spritesheet_get_rect_balloon_orange (struct spritesheet * self) {
-    return self->rects.balloon.orange;
+    return self->balloon.orange;
 }
 
 SDL_Rect spritesheet_get_rect_balloon_red (struct spritesheet * self) {
-    return self->rects.balloon.red;
+    return self->balloon.red;
 }
 
 SDL_Rect spritesheet_get_rect_balloon_yellow (struct spritesheet * self) {
-    return self->rects.balloon.yellow;
+    return self->balloon.yellow;
 }
 
 char * spritesheet_get_path (struct spritesheet * self) {
@@ -58,55 +56,55 @@ SDL_Surface * spritesheet_get_surface (struct spritesheet * self) {
 }
 
 void spritesheet_init (struct spritesheet * self) {
-    self->rects.balloon.orange = (SDL_Rect) {
+    self->balloon.orange = (SDL_Rect) {
         .h = 12,
         .w = 9,
         .x = 184,
         .y = 1,
     };
-    self->rects.balloon.red = (SDL_Rect) {
+    self->balloon.red = (SDL_Rect) {
         .h = 8,
         .w = 6,
         .x = 184,
         .y = 20,
     };
-    self->rects.balloon.yellow = (SDL_Rect) {
+    self->balloon.yellow = (SDL_Rect) {
         .h = 16,
         .w = 12,
         .x = 166,
         .y = 1,
     };
-    self->rects.barrel = (SDL_Rect) {
+    self->barrel = (SDL_Rect) {
         .h = 11,
         .w = 55,
         .x = 4,
         .y = 68,
     };
-    self->rects.bullet = (SDL_Rect) {
+    self->bullet = (SDL_Rect) {
         .x = 188,
         .y = 38,
         .w = 5,
         .h = 5
     };
-    self->rects.collision = (SDL_Rect) {
+    self->collision = (SDL_Rect) {
          .x = 172,
          .y = 38,
          .w = 3,
          .h = 3,
     };
-    self->rects.flash = (SDL_Rect) {
+    self->flash = (SDL_Rect) {
          .x = 166,
          .y = 63,
          .w = 30,
          .h = 21,
     };
-    self->rects.moon = (SDL_Rect) {
+    self->moon = (SDL_Rect) {
         .x = 75,
         .y = 1,
         .w = 90,
         .h = 90,
     };
-    self->rects.turret = (SDL_Rect) {
+    self->turret = (SDL_Rect) {
        .h = 47,
        .w = 69,
        .x = 4,
@@ -122,14 +120,14 @@ void spritesheet_init (struct spritesheet * self) {
 }
 
 struct spritesheet * spritesheet_new (void) {
-    if (spritesheet != nullptr) {
-        // memory has already been allocated for `spritesheet`, and `spritesheet` is singleton
-        return spritesheet;
+    if (singleton != nullptr) {
+        // memory has already been allocated for `singleton`
+        return singleton;
     }
-    spritesheet = (struct spritesheet *) calloc(1, sizeof(struct spritesheet));
-    if (spritesheet == nullptr) {
+    singleton = (struct spritesheet *) calloc(1, sizeof(struct spritesheet));
+    if (singleton == nullptr) {
         fprintf(stderr, "ERROR allocating dynamic memory for struct spritesheet, aborting.\n");
         exit(1);
     }
-    return spritesheet;
+    return singleton;
 }
