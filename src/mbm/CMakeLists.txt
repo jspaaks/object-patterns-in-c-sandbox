@@ -57,6 +57,7 @@ target_link_options(
 target_sources(
     tgt_lib_mbm
     PRIVATE
+        background.c
         balloon.c
         scene.c
         spritesheet.c
@@ -67,6 +68,7 @@ target_sources(
                 ../../include
                 ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
             FILES
+                ../../include/mbm/background.h
                 ../../include/mbm/balloon.h
                 ../../include/mbm/scene.h
                 ../../include/mbm/spritesheet.h

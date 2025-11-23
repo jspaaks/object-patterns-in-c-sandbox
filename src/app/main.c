@@ -1,18 +1,19 @@
-#define SDL_MAIN_USE_CALLBACKS 1  // use the callbacks instead of main()
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>        // definition of main() that calls the callback functions
-#include <SDL3/SDL_init.h>        // SDL_InitFlags type, defines
-#include <SDL3/SDL_video.h>       // SDL_WindowFlags type, defines
+#include "mbm/background.h"
+#include "mbm/balloon.h"
 #include "mbm/scene.h"
 #include "mbm/spritesheet.h"
-#include "mbm/balloon.h"
+#include <SDL3/SDL_init.h>        // SDL_InitFlags type, defines
+#define SDL_MAIN_USE_CALLBACKS 1  // use the callbacks instead of main()
+#include <SDL3/SDL_main.h>        // definition of main() that calls the callback functions
+#include <SDL3/SDL_video.h>       // SDL_WindowFlags type, defines
+#include <SDL3/SDL.h>
 
-// We will use this renderer to draw into this window every frame.
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
 static Balloon * balloon = nullptr;
 static Scene * scene = nullptr;
 static Spritesheet * spritesheet = nullptr;
+static Background * background = nullptr;
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -59,9 +60,15 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
     spritesheet = spritesheet_new();
     spritesheet_init(spritesheet);
 
+    // initialize the background
+    background = background_new();
+    background_init(background, renderer);
+
+    // initialize the scene
     scene = scene_new();
     scene_init(scene, window, renderer);
 
+    // initializee a balloon
     balloon = balloon_new();
 
     // continue with the rest of the program
@@ -72,13 +79,12 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 // `SDL_AppIterate` runs once per frame, and is the heart of the program
 SDL_AppResult SDL_AppIterate(void * appstate) {
 
+    // update relevant objects
+    background_update(background);
     scene_update(scene);
 
-    // clear the screen
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
-
-    // draw the scene
+    // draw relevant objects
+    background_draw(background);
     scene_draw(scene);
 
     // update the screen with this frame's rendering
