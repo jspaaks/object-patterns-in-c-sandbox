@@ -1,11 +1,14 @@
-#include "mbm/background.h"
-#include "mbm/balloon.h"
-#include "mbm/scene.h"
-#include "mbm/spritesheet.h"
+#include "mbm/background.h"       // Background type and associated functions
+#include "mbm/balloon.h"          // Balloon type and associated functions
+#include "mbm/scene.h"            // Scene type and associated functions
+#include "mbm/spritesheet.h"      // Spritesheet and associated functions
+#include <SDL3/SDL_error.h>       // SDL_GetError()
 #include <SDL3/SDL_init.h>        // SDL_InitFlags type, defines
+#include <SDL3/SDL_log.h>         // SDL_Log()
 #define SDL_MAIN_USE_CALLBACKS 1  // use the callbacks instead of main()
 #include <SDL3/SDL_main.h>        // definition of main() that calls the callback functions
-#include <SDL3/SDL_video.h>       // SDL_WindowFlags type, defines
+#include <SDL3/SDL_render.h>      // SDL_Renderer
+#include <SDL3/SDL_video.h>       // SDL_Window, SDL_WindowFlags type, defines
 #include <SDL3/SDL.h>
 
 static SDL_Window * window = nullptr;
