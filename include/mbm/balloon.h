@@ -4,7 +4,6 @@
 #include "SDL3/SDL_rect.h"
 #include <stddef.h>
 
-
 // `struct balloon` is an opaque data structure
 struct balloon;
 
