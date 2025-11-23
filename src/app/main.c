@@ -49,7 +49,8 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
     // initialize the window and renderer
     {
         const SDL_WindowFlags flags = SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE;
-        bool success = SDL_CreateWindowAndRenderer("SDL3 demo", WINDOW_WIDTH, WINDOW_HEIGHT, flags, &window, &renderer);
+        bool success = SDL_CreateWindowAndRenderer("SDL3 demo", WINDOW_WIDTH, WINDOW_HEIGHT,
+                                                   flags, &window, &renderer);
         if (!success) {
             SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
             return SDL_APP_FAILURE;
@@ -96,10 +97,9 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
 
 // SDL_AppQuit runs once at shutdown
 void SDL_AppQuit(void * appstate, SDL_AppResult result) {
-    //SDL_DestroyTexture(texture);
-    /* SDL will clean up the window/renderer for us. */
     background_delete(&background);
     balloon_delete(&balloon);
     scene_delete(&scene);
     spritesheet_delete(&spritesheet);
+    // SDL will clean up the window and renderer for us
 }
