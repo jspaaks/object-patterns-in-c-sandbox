@@ -3,7 +3,6 @@
 #include "mbm/abi.h"
 #include "SDL3/SDL_surface.h"
 #include "SDL3/SDL_rect.h"
-#include <stddef.h>
 
 // `struct spritesheet` is an opaque data structure
 struct spritesheet;
