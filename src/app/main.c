@@ -98,6 +98,7 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
 void SDL_AppQuit(void * appstate, SDL_AppResult result) {
     //SDL_DestroyTexture(texture);
     /* SDL will clean up the window/renderer for us. */
+    background_delete(&background);
     balloon_delete(&balloon);
     scene_delete(&scene);
     spritesheet_delete(&spritesheet);
