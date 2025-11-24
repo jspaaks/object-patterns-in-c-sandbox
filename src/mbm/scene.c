@@ -64,7 +64,7 @@ void scene_update (struct scene * self) {
 
 void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * renderer) {
     int h = 720;
-    int w = 1024;
+    int w = 1280;
     *self = (struct scene) {
         .color = (SDL_Color) {
             .r = 0,
