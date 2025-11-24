@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 // declare properties of `struct spritesheet`
 struct spritesheet {
     char * path;

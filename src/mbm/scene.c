@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 // declare properties of `struct scene`
 struct scene {
     SDL_Color color;
