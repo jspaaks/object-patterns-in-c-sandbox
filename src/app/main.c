@@ -11,7 +11,6 @@
 
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
-static Balloon * balloon = nullptr;
 static Game * game = nullptr;
 
 #define WINDOW_WIDTH 640
@@ -60,13 +59,9 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
     game = game_new();
     game_init(game, window, renderer);
 
-    // initializee a balloon
-    balloon = balloon_new();
-
     // continue with the rest of the program
     return SDL_APP_CONTINUE;
 }
-
 
 // `SDL_AppIterate` runs once per frame, and is the heart of the program
 SDL_AppResult SDL_AppIterate(void * appstate) {
@@ -83,10 +78,8 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
     return SDL_APP_CONTINUE;
 }
 
-
 // SDL_AppQuit runs once at shutdown
 void SDL_AppQuit(void * appstate, SDL_AppResult result) {
-    balloon_delete(&balloon);
     game_delete(&game);
     // SDL will clean up the window and renderer for us
 }
