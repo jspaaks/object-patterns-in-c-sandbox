@@ -2,20 +2,44 @@
 #include "mbm/game.h"             // type `Game` and associated functions
 #include "mbm/scene.h"            // type `Scene` and associated functions
 #include "mbm/spritesheet.h"      // type `Spritesheet` and associated functions
+#include <SDL3/SDL_events.h>      // type `SDL_Event`
+#include <SDL3/SDL_init.h>        // type `SDL_AppResult`
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`
 #include <SDL3/SDL_video.h>       // type `SDL_Window`
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef enum {
+    MBM_GAME_STATE_LOBBY,
+    MBM_GAME_STATE_PLAYING,
+    MBM_GAME_STATE_LEN,
+} State;
+
+typedef void (*DrawFunction)(struct game *);
+typedef SDL_AppResult (*HandleEventFunction)(SDL_Event * event);
+typedef void (*UpdateFunction)(struct game *);
+
 // declare properties of `struct game`
 struct game {
     Background * background;
+    DrawFunction draw_functions[MBM_GAME_STATE_LEN];
+    HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
+    State state;
     Scene * scene;
     Spritesheet * spritesheet;
+    UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
 
 // define pointer to singleton instance of `struct game`
 static struct game * singleton = nullptr;
+
+// forward function declarations
+static void game_draw_lobby (struct game * self);
+static void game_draw_playing (struct game * self);
+static SDL_AppResult game_handle_event_lobby (SDL_Event * event);
+static SDL_AppResult game_handle_event_playing (SDL_Event * event);
+static void game_update_lobby (struct game * self);
+static void game_update_playing (struct game * self);
 
 void game_delete (struct game ** self) {
 
@@ -30,11 +54,57 @@ void game_delete (struct game ** self) {
 }
 
 void game_draw (struct game * self) {
+    self->draw_functions[self->state](self);
+}
+
+static void game_draw_lobby (struct game * self) {
     background_draw(self->background);
     scene_draw(self->scene);
 }
 
+static void game_draw_playing (struct game * self) {
+    background_draw(self->background);
+    scene_draw(self->scene);
+}
+
+SDL_AppResult game_handle_event (struct game * self, SDL_Event * event) {
+    return self->handle_event_functions[self->state](event);
+}
+
+static SDL_AppResult game_handle_event_lobby (SDL_Event * event) {
+    switch (event->type) {
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
+        case SDL_EVENT_KEY_DOWN:
+            if (event->key.scancode == SDL_SCANCODE_Q) {
+                return SDL_APP_SUCCESS;
+            }
+    }
+    return SDL_APP_CONTINUE;
+}
+
+static SDL_AppResult game_handle_event_playing (SDL_Event * event) {
+    switch (event->type) {
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
+        case SDL_EVENT_KEY_DOWN:
+            if (event->key.scancode == SDL_SCANCODE_Q) {
+                return SDL_APP_SUCCESS;
+            }
+    }
+    return SDL_APP_CONTINUE;
+}
+
 void game_update (struct game * self) {
+    self->update_functions[self->state](self);
+}
+
+static void game_update_lobby (struct game * self) {
+    background_update(self->background);
+    scene_update(self->scene);
+}
+
+static void game_update_playing (struct game * self) {
     background_update(self->background);
     scene_update(self->scene);
 }
@@ -43,6 +113,21 @@ void game_init (struct game * self, SDL_Window * window, SDL_Renderer * renderer
 
     // empty-initialize the singleton instance of `struct game`
     *self = (struct game) {};
+
+    // initialize the state-based indirection to static draw functions
+    self->draw_functions[MBM_GAME_STATE_LOBBY] = game_draw_lobby;
+    self->draw_functions[MBM_GAME_STATE_PLAYING] = game_draw_playing;
+
+    // initialize the state-based indirection to static update functions
+    self->handle_event_functions[MBM_GAME_STATE_LOBBY] = game_handle_event_lobby;
+    self->handle_event_functions[MBM_GAME_STATE_PLAYING] = game_handle_event_playing;
+
+    // initialize the state-based indirection to static update functions
+    self->update_functions[MBM_GAME_STATE_LOBBY] = game_update_lobby;
+    self->update_functions[MBM_GAME_STATE_PLAYING] = game_update_playing;
+
+    // initialize the gamestate
+    self->state = MBM_GAME_STATE_LOBBY;
 
     // initialize the spritesheet
     self->spritesheet = spritesheet_new();
@@ -55,7 +140,6 @@ void game_init (struct game * self, SDL_Window * window, SDL_Renderer * renderer
     // initialize the background
     self->background = background_new();
     background_init(self->background, renderer);
-
 }
 
 struct game * game_new (void) {
