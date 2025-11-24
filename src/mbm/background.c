@@ -29,9 +29,9 @@ void background_update (struct background *) {}
 void background_init (struct background * self, SDL_Renderer * renderer) {
     *self = (struct background) {
         .color = (SDL_Color) {
-            .r = 255,
-            .g = 255,
-            .b = 255,
+            .r = 0,
+            .g = 0,
+            .b = 0,
             .a = SDL_ALPHA_OPAQUE,
         },
         .renderer = renderer,
