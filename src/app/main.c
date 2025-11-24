@@ -1,22 +1,18 @@
-#include "mbm/background.h"       // Background type and associated functions
-#include "mbm/balloon.h"          // Balloon type and associated functions
-#include "mbm/scene.h"            // Scene type and associated functions
-#include "mbm/spritesheet.h"      // Spritesheet and associated functions
-#include <SDL3/SDL_error.h>       // SDL_GetError()
-#include <SDL3/SDL_init.h>        // SDL_InitFlags type, defines
-#include <SDL3/SDL_log.h>         // SDL_Log()
+#include "mbm/balloon.h"          // type `Balloon` and associated functions
+#include "mbm/game.h"             // type `Game` and associated functions
+#include <SDL3/SDL_error.h>       // function `SDL_GetError`
+#include <SDL3/SDL_init.h>        // type `SDL_InitFlags`, defines
+#include <SDL3/SDL_log.h>         // function `SDL_Log`
 #define SDL_MAIN_USE_CALLBACKS 1  // use the callbacks instead of main()
 #include <SDL3/SDL_main.h>        // definition of main() that calls the callback functions
-#include <SDL3/SDL_render.h>      // SDL_Renderer
-#include <SDL3/SDL_video.h>       // SDL_Window, SDL_WindowFlags type, defines
+#include <SDL3/SDL_render.h>      // type `SDL_Renderer`
+#include <SDL3/SDL_video.h>       // types `SDL_Window`, `SDL_WindowFlags`, defines
 #include <SDL3/SDL.h>
 
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
 static Balloon * balloon = nullptr;
-static Scene * scene = nullptr;
-static Spritesheet * spritesheet = nullptr;
-static Background * background = nullptr;
+static Game * game = nullptr;
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
@@ -60,17 +56,9 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
         }
     }
 
-    // load the spritesheet from file
-    spritesheet = spritesheet_new();
-    spritesheet_init(spritesheet);
-
-    // initialize the background
-    background = background_new();
-    background_init(background, renderer);
-
-    // initialize the scene
-    scene = scene_new();
-    scene_init(scene, window, renderer);
+    // initialize the game object
+    game = game_new();
+    game_init(game, window, renderer);
 
     // initializee a balloon
     balloon = balloon_new();
@@ -84,12 +72,10 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 SDL_AppResult SDL_AppIterate(void * appstate) {
 
     // update relevant objects
-    background_update(background);
-    scene_update(scene);
+    game_update(game);
 
     // draw relevant objects
-    background_draw(background);
-    scene_draw(scene);
+    game_draw(game);
 
     // update the screen with this frame's rendering
     SDL_RenderPresent(renderer);
@@ -100,9 +86,7 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
 
 // SDL_AppQuit runs once at shutdown
 void SDL_AppQuit(void * appstate, SDL_AppResult result) {
-    background_delete(&background);
     balloon_delete(&balloon);
-    scene_delete(&scene);
-    spritesheet_delete(&spritesheet);
+    game_delete(&game);
     // SDL will clean up the window and renderer for us
 }
