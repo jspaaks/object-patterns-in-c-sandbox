@@ -14,9 +14,6 @@ static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
 static Game * game = nullptr;
 
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
-
 // `SDL_AppEvent` runs when a new event (mouse input, keypresses, etc) occurs
 SDL_AppResult SDL_AppEvent(void * appstate, SDL_Event * event) {
     return game_handle_event(game, event);
@@ -38,8 +35,10 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 
     // initialize the window and renderer
     {
+        const int window_width = 640+260;
+        const int window_height = 360;
         const SDL_WindowFlags flags = SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE;
-        bool success = SDL_CreateWindowAndRenderer("SDL3 demo", WINDOW_WIDTH, WINDOW_HEIGHT,
+        bool success = SDL_CreateWindowAndRenderer("SDL3 demo", window_width, window_height,
                                                    flags, &window, &renderer);
         if (!success) {
             SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
