@@ -13,8 +13,6 @@ struct scene {
     float scale;
     SDL_FRect sim;
     SDL_FRect tgt;
-    SDL_Renderer * renderer;
-    SDL_Window * window;
 };
 
 // define pointer to singleton instance of `struct scene`
@@ -25,13 +23,37 @@ void scene_delete (struct scene ** self) {
     *self = nullptr;
 }
 
-void scene_draw (struct scene * self) {
-    SDL_SetRenderDrawColor(self->renderer, self->color.r, self->color.g, self->color.b, self->color.a);
-    SDL_RenderFillRect(self->renderer, &self->tgt);
+void scene_draw (struct scene * self, SDL_Renderer * renderer) {
+    SDL_SetRenderDrawColor(renderer, self->color.r, self->color.g, self->color.b, self->color.a);
+    SDL_RenderFillRect(renderer, &self->tgt);
 }
 
 float scene_get_scale (struct scene * self) {
     return self->scale;
+}
+
+float scene_get_sim_h (struct scene * self) {
+    return self->sim.h;
+}
+
+float scene_get_sim_w (struct scene * self) {
+    return self->sim.w;
+}
+
+float scene_get_sim_x (struct scene * self) {
+    return self->sim.x;
+}
+
+float scene_get_sim_y (struct scene * self) {
+    return self->sim.y;
+}
+
+float scene_get_tgt_h (struct scene * self) {
+    return self->tgt.h;
+}
+
+float scene_get_tgt_w (struct scene * self) {
+    return self->tgt.w;
 }
 
 float scene_get_tgt_x (struct scene * self) {
@@ -42,7 +64,7 @@ float scene_get_tgt_y (struct scene * self) {
     return self->tgt.y;
 }
 
-void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * renderer) {
+void scene_init (struct scene * self) {
     const int height = 720;
     const int width = 1280;
     *self = (struct scene) {
@@ -53,7 +75,6 @@ void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * render
             .a = SDL_ALPHA_OPAQUE,
         },
         .ratio = (float) width / height,
-        .renderer = renderer,
         .scale = 1.0f,
         .sim = (SDL_FRect) {
             .h = height,
@@ -67,7 +88,6 @@ void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * render
             .x = 0,
             .y = 0,
         },
-        .window = window,
     };
 }
 
@@ -84,10 +104,10 @@ struct scene * scene_new (void) {
     return singleton;
 }
 
-void scene_update (struct scene * self) {
+void scene_update (struct scene * self, SDL_Window * window) {
     int h = -1;
     int w = -1;
-    SDL_GetWindowSize(self->window, &w, &h);
+    SDL_GetWindowSize(window, &w, &h);
 
     float ratio = (float) w / h;
     if (ratio < self->ratio) {
