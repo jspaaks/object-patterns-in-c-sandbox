@@ -12,7 +12,6 @@ struct ground {
     SDL_FRect sim;
     SDL_FRect tgt;
     int thickness;
-    SDL_Renderer * renderer;
 };
 
 // define pointer to singleton instance of `struct ground`
@@ -23,12 +22,12 @@ void ground_delete (struct ground ** self) {
     *self = nullptr;
 }
 
-void ground_draw (struct ground * self) {
-    SDL_SetRenderDrawColor(self->renderer, self->color.r, self->color.g, self->color.b, self->color.a);
-    SDL_RenderFillRect(self->renderer, &self->tgt);
+void ground_draw (struct ground * self, SDL_Renderer * renderer) {
+    SDL_SetRenderDrawColor(renderer, self->color.r, self->color.g, self->color.b, self->color.a);
+    SDL_RenderFillRect(renderer, &self->tgt);
 }
 
-void ground_init (struct ground * self, SDL_Renderer * renderer) {
+void ground_init (struct ground * self) {
     const int thickness = 80;
     const int width = 1280;
     const int height = 720;
@@ -39,7 +38,6 @@ void ground_init (struct ground * self, SDL_Renderer * renderer) {
             .b = 26,
             .a = SDL_ALPHA_OPAQUE,
         },
-        .renderer = renderer,
         .sim = (SDL_FRect) {
             .h = thickness,
             .w = width,
