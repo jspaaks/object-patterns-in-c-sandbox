@@ -7,7 +7,6 @@
 // declare properties of `struct background`
 struct background {
     SDL_Color color;
-    SDL_Renderer * renderer;
 };
 
 // define pointer to singleton instance of `struct background`
@@ -18,13 +17,12 @@ void background_delete (struct background ** self) {
     *self = nullptr;
 }
 
-void background_draw (struct background * self) {
-    SDL_SetRenderDrawColor(self->renderer,
-                           self->color.r, self->color.g, self->color.b, self->color.a);
-    SDL_RenderClear(self->renderer);
+void background_draw (struct background * self, SDL_Renderer * renderer) {
+    SDL_SetRenderDrawColor(renderer, self->color.r, self->color.g, self->color.b, self->color.a);
+    SDL_RenderClear(renderer);
 }
 
-void background_init (struct background * self, SDL_Renderer * renderer) {
+void background_init (struct background * self) {
     *self = (struct background) {
         .color = (SDL_Color) {
             .r = 0,
@@ -32,7 +30,6 @@ void background_init (struct background * self, SDL_Renderer * renderer) {
             .b = 0,
             .a = SDL_ALPHA_OPAQUE,
         },
-        .renderer = renderer,
     };
 }
 
