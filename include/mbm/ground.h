@@ -13,6 +13,7 @@ typedef struct ground Ground;
 MBM_ABI void ground_delete (struct ground ** self);
 MBM_ABI void ground_draw (struct ground * self, SDL_Renderer * renderer);
 MBM_ABI void ground_init (struct ground * self);
+MBM_ABI float ground_get_thickness (struct ground * self);
 MBM_ABI struct ground * ground_new (void);
 MBM_ABI void ground_update (struct ground * self, struct scene * scene);
 

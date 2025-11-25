@@ -83,6 +83,10 @@ SDL_Texture * spritesheet_get_texture (struct spritesheet * self) {
     return self->texture;
 }
 
+SDL_FRect * spritesheet_get_turret (struct spritesheet * self) {
+    return &self->turret;
+}
+
 void spritesheet_init (struct spritesheet * self, SDL_Renderer * renderer) {
     self->balloon.orange = (SDL_FRect) {
         .h = 12.0,

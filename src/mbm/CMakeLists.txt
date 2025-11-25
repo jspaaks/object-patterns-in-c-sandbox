@@ -64,6 +64,7 @@ target_sources(
         moon.c
         scene.c
         spritesheet.c
+        turret.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
             TYPE HEADERS
@@ -78,6 +79,7 @@ target_sources(
                 ../../include/mbm/moon.h
                 ../../include/mbm/scene.h
                 ../../include/mbm/spritesheet.h
+                ../../include/mbm/turret.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )
 

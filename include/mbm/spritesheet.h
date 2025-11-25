@@ -21,6 +21,7 @@ MBM_ABI SDL_FRect * spritesheet_get_collision (struct spritesheet * self);
 MBM_ABI SDL_FRect * spritesheet_get_flash (struct spritesheet * self);
 MBM_ABI SDL_FRect * spritesheet_get_moon (struct spritesheet * self);
 MBM_ABI SDL_Texture * spritesheet_get_texture (struct spritesheet * self);
+MBM_ABI SDL_FRect * spritesheet_get_turret (struct spritesheet * self);
 MBM_ABI void spritesheet_init (struct spritesheet * self, SDL_Renderer * renderer);
 MBM_ABI struct spritesheet * spritesheet_new (void);
 

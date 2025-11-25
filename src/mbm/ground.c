@@ -11,7 +11,7 @@ struct ground {
     SDL_Color color;
     SDL_FRect sim;
     SDL_FRect tgt;
-    int thickness;
+    float thickness;
 };
 
 // define pointer to singleton instance of `struct ground`
@@ -27,10 +27,14 @@ void ground_draw (struct ground * self, SDL_Renderer * renderer) {
     SDL_RenderFillRect(renderer, &self->tgt);
 }
 
+float ground_get_thickness (struct ground * self) {
+    return self->thickness;
+}
+
 void ground_init (struct ground * self) {
-    const int thickness = 80;
-    const int width = 1280;
-    const int height = 720;
+    const float thickness = 80.0;
+    const float width = 1280.0;
+    const float height = 720.0;
     *self = (struct ground) {
         .color = (SDL_Color) {
             .r = 11,

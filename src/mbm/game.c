@@ -4,6 +4,7 @@
 #include "mbm/moon.h"             // type `Moon` and associated functions
 #include "mbm/scene.h"            // type `Scene` and associated functions
 #include "mbm/spritesheet.h"      // type `Spritesheet` and associated functions
+#include "mbm/turret.h"           // type `Turret` and associated functions
 #include <SDL3/SDL_events.h>      // type `SDL_Event`
 #include <SDL3/SDL_init.h>        // type `SDL_AppResult`
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`
@@ -32,6 +33,7 @@ struct game {
     Scene * scene;
     Spritesheet * spritesheet;
     UpdateFunction update_functions[MBM_GAME_STATE_LEN];
+    Turret * turret;
 };
 
 // define pointer to singleton instance of `struct game`
@@ -53,6 +55,7 @@ void game_delete (struct game ** self) {
     scene_delete(&(*self)->scene);
     background_delete(&(*self)->background);
     spritesheet_delete(&(*self)->spritesheet);
+    turret_delete(&(*self)->turret);
 
     // release own resources
     free(*self);
@@ -68,6 +71,7 @@ static void game_draw_lobby (struct game * self, SDL_Renderer * renderer) {
     scene_draw(self->scene, renderer);
     ground_draw(self->ground, renderer);
     moon_draw(self->moon, self->spritesheet, renderer);
+    turret_draw(self->turret, self->spritesheet, renderer);
 }
 
 static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
@@ -75,6 +79,7 @@ static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
     scene_draw(self->scene, renderer);
     ground_draw(self->ground, renderer);
     moon_draw(self->moon, self->spritesheet, renderer);
+    turret_draw(self->turret, self->spritesheet, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Event * event) {
@@ -144,6 +149,10 @@ void game_init (struct game * self, SDL_Renderer * renderer) {
     // initialize the moon
     self->moon = moon_new();
     moon_init(self->moon, self->scene);
+
+    // initialize the turret
+    self->turret = turret_new();
+    turret_init(self->turret, self->scene, self->ground);
 }
 
 struct game * game_new (void) {
@@ -168,6 +177,7 @@ static void game_update_lobby (struct game * self, SDL_Window * window) {
     scene_update(self->scene, window);
     ground_update(self->ground, self->scene);
     moon_update(self->moon, self->scene);
+    turret_update(self->turret, self->scene);
 }
 
 static void game_update_playing (struct game * self, SDL_Window * window) {
@@ -175,4 +185,5 @@ static void game_update_playing (struct game * self, SDL_Window * window) {
     scene_update(self->scene, window);
     ground_update(self->ground, self->scene);
     moon_update(self->moon, self->scene);
+    turret_update(self->turret, self->scene);
 }
