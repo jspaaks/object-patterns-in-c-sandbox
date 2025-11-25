@@ -48,7 +48,7 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 
     // initialize the game object
     game = game_new();
-    game_init(game, window, renderer);
+    game_init(game, renderer);
 
     // continue with the rest of the program
     return SDL_APP_CONTINUE;
@@ -58,10 +58,10 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 SDL_AppResult SDL_AppIterate(void * appstate) {
 
     // update relevant objects
-    game_update(game);
+    game_update(game, window);
 
     // draw relevant objects
-    game_draw(game);
+    game_draw(game, renderer);
 
     // update the screen with this frame's rendering
     SDL_RenderPresent(renderer);
