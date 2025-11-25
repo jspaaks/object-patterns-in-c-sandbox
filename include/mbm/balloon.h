@@ -1,7 +1,7 @@
 #ifndef MBM_BALLOON_H_INCLUDED
 #define MBM_BALLOON_H_INCLUDED
 #include "mbm/abi.h"
-#include "SDL3/SDL_rect.h"
+#include "SDL3/SDL_rect.h"        // type `SDL_FRect`
 #include <stddef.h>
 
 // `struct balloon` is an opaque data structure
