@@ -9,7 +9,6 @@
 
 // declare properties of `struct moon`
 struct moon {
-    SDL_Color color;
     SDL_FRect sim;
     SDL_FRect tgt;
 };
@@ -30,12 +29,6 @@ void moon_draw (struct moon * self, struct spritesheet * spritesheet, SDL_Render
 
 void moon_init (struct moon * self, struct scene * scene) {
     *self = (struct moon) {
-        .color = (SDL_Color) {
-            .r = 11,
-            .g = 1,
-            .b = 26,
-            .a = SDL_ALPHA_OPAQUE,
-        },
         .sim = (SDL_FRect) {
             .h = 90.0,
             .w = 90.0,
