@@ -60,6 +60,7 @@ target_sources(
         background.c
         balloon.c
         game.c
+        ground.c
         scene.c
         spritesheet.c
     PUBLIC
@@ -72,6 +73,7 @@ target_sources(
                 ../../include/mbm/background.h
                 ../../include/mbm/balloon.h
                 ../../include/mbm/game.h
+                ../../include/mbm/ground.h
                 ../../include/mbm/scene.h
                 ../../include/mbm/spritesheet.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file

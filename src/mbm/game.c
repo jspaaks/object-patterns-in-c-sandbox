@@ -1,5 +1,6 @@
 #include "mbm/background.h"       // type `Background` and associated functions
 #include "mbm/game.h"             // type `Game` and associated functions
+#include "mbm/ground.h"           // type `Ground` and associated functions
 #include "mbm/scene.h"            // type `Scene` and associated functions
 #include "mbm/spritesheet.h"      // type `Spritesheet` and associated functions
 #include <SDL3/SDL_events.h>      // type `SDL_Event`
@@ -24,6 +25,7 @@ struct game {
     Background * background;
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
+    Ground * ground;
     State state;
     Scene * scene;
     Spritesheet * spritesheet;
@@ -60,6 +62,7 @@ void game_draw (struct game * self) {
 static void game_draw_lobby (struct game * self) {
     background_draw(self->background);
     scene_draw(self->scene);
+    ground_draw(self->ground);
 }
 
 static void game_draw_playing (struct game * self) {
@@ -102,11 +105,13 @@ void game_update (struct game * self) {
 static void game_update_lobby (struct game * self) {
     background_update(self->background);
     scene_update(self->scene);
+    ground_update(self->ground, self->scene);
 }
 
 static void game_update_playing (struct game * self) {
     background_update(self->background);
     scene_update(self->scene);
+    ground_update(self->ground, self->scene);
 }
 
 void game_init (struct game * self, SDL_Window * window, SDL_Renderer * renderer) {
@@ -140,6 +145,10 @@ void game_init (struct game * self, SDL_Window * window, SDL_Renderer * renderer
     // initialize the background
     self->background = background_new();
     background_init(self->background, renderer);
+
+    // initialize the ground
+    self->ground = ground_new();
+    ground_init(self->ground, renderer);
 }
 
 struct game * game_new (void) {
