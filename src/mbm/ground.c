@@ -28,16 +28,6 @@ void ground_draw (struct ground * self) {
     SDL_RenderFillRect(self->renderer, &self->tgt);
 }
 
-void ground_update (struct ground * self, struct scene * scene) {
-    float scale = scene_get_scale(scene);
-    self->tgt = (SDL_FRect) {
-        .h = self->sim.h * scale,
-        .w = self->sim.w * scale,
-        .x = scene_get_tgt_x(scene) + self->sim.x * scale,
-        .y = scene_get_tgt_y(scene) + self->sim.y * scale,
-    };
-}
-
 void ground_init (struct ground * self, SDL_Renderer * renderer) {
     const int thickness = 80;
     const int width = 1280;
@@ -77,4 +67,14 @@ struct ground * ground_new (void) {
         exit(1);
     }
     return singleton;
+}
+
+void ground_update (struct ground * self, struct scene * scene) {
+    float scale = scene_get_scale(scene);
+    self->tgt = (SDL_FRect) {
+        .h = self->sim.h * scale,
+        .w = self->sim.w * scale,
+        .x = scene_get_tgt_x(scene) + self->sim.x * scale,
+        .y = scene_get_tgt_y(scene) + self->sim.y * scale,
+    };
 }

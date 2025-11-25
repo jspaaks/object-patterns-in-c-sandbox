@@ -11,10 +11,10 @@ struct spritesheet;
 typedef struct spritesheet Spritesheet;
 
 MBM_ABI void spritesheet_delete (struct spritesheet ** self);
+MBM_ABI char * spritesheet_get_path (struct spritesheet * self);
 MBM_ABI SDL_Rect spritesheet_get_rect_balloon_orange (struct spritesheet * self);
 MBM_ABI SDL_Rect spritesheet_get_rect_balloon_red (struct spritesheet * self);
 MBM_ABI SDL_Rect spritesheet_get_rect_balloon_yellow (struct spritesheet * self);
-MBM_ABI char * spritesheet_get_path (struct spritesheet * self);
 MBM_ABI SDL_Surface * spritesheet_get_surface (struct spritesheet * self);
 MBM_ABI void spritesheet_init (struct spritesheet * self);
 MBM_ABI struct spritesheet * spritesheet_new (void);

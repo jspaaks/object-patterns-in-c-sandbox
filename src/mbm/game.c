@@ -46,6 +46,7 @@ static void game_update_playing (struct game * self);
 void game_delete (struct game ** self) {
 
     // delete objects
+    ground_delete(&(*self)->ground);
     scene_delete(&(*self)->scene);
     background_delete(&(*self)->background);
     spritesheet_delete(&(*self)->spritesheet);
@@ -98,22 +99,6 @@ static SDL_AppResult game_handle_event_playing (SDL_Event * event) {
     return SDL_APP_CONTINUE;
 }
 
-void game_update (struct game * self) {
-    self->update_functions[self->state](self);
-}
-
-static void game_update_lobby (struct game * self) {
-    background_update(self->background);
-    scene_update(self->scene);
-    ground_update(self->ground, self->scene);
-}
-
-static void game_update_playing (struct game * self) {
-    background_update(self->background);
-    scene_update(self->scene);
-    ground_update(self->ground, self->scene);
-}
-
 void game_init (struct game * self, SDL_Window * window, SDL_Renderer * renderer) {
 
     // empty-initialize the singleton instance of `struct game`
@@ -162,4 +147,20 @@ struct game * game_new (void) {
         exit(1);
     }
     return singleton;
+}
+
+void game_update (struct game * self) {
+    self->update_functions[self->state](self);
+}
+
+static void game_update_lobby (struct game * self) {
+    background_update(self->background);
+    scene_update(self->scene);
+    ground_update(self->ground, self->scene);
+}
+
+static void game_update_playing (struct game * self) {
+    background_update(self->background);
+    scene_update(self->scene);
+    ground_update(self->ground, self->scene);
 }

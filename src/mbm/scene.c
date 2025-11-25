@@ -30,16 +30,16 @@ void scene_draw (struct scene * self) {
     SDL_RenderFillRect(self->renderer, &self->tgt);
 }
 
+float scene_get_scale (struct scene * self) {
+    return self->scale;
+}
+
 float scene_get_tgt_x (struct scene * self) {
     return self->tgt.x;
 }
 
 float scene_get_tgt_y (struct scene * self) {
     return self->tgt.y;
-}
-
-float scene_get_scale (struct scene * self) {
-    return self->scale;
 }
 
 void scene_init (struct scene * self, SDL_Window * window, SDL_Renderer * renderer) {

@@ -32,10 +32,6 @@ SDL_FRect balloon_get_sim (struct balloon * self) {
     return self->sim;
 }
 
-size_t balloon_memsize (void) {
-    return sizeof(struct balloon);
-}
-
 void balloon_init (struct balloon * self) {
     self->sim = (SDL_FRect) {
         .h = 12.0,
@@ -53,6 +49,10 @@ void balloon_init (struct balloon * self) {
     //}
     //SDL_DestroySurface(surface);
 
+}
+
+size_t balloon_memsize (void) {
+    return sizeof(struct balloon);
 }
 
 struct balloon * balloon_new (void) {

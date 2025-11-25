@@ -24,8 +24,6 @@ void background_draw (struct background * self) {
     SDL_RenderClear(self->renderer);
 }
 
-void background_update (struct background *) {}
-
 void background_init (struct background * self, SDL_Renderer * renderer) {
     *self = (struct background) {
         .color = (SDL_Color) {
@@ -50,3 +48,5 @@ struct background * background_new (void) {
     }
     return singleton;
 }
+
+void background_update (struct background *) {}

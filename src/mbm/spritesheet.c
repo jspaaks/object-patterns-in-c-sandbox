@@ -34,6 +34,10 @@ void spritesheet_delete (struct spritesheet ** self) {
     *self = nullptr;
 }
 
+char * spritesheet_get_path (struct spritesheet * self) {
+    return self->path;
+}
+
 SDL_Rect spritesheet_get_rect_balloon_orange (struct spritesheet * self) {
     return self->balloon.orange;
 }
@@ -44,10 +48,6 @@ SDL_Rect spritesheet_get_rect_balloon_red (struct spritesheet * self) {
 
 SDL_Rect spritesheet_get_rect_balloon_yellow (struct spritesheet * self) {
     return self->balloon.yellow;
-}
-
-char * spritesheet_get_path (struct spritesheet * self) {
-    return self->path;
 }
 
 SDL_Surface * spritesheet_get_surface (struct spritesheet * self) {
