@@ -1,4 +1,5 @@
 #include "mbm/background.h"       // type `Background` and associated functions
+#include "mbm/barrel.h"           // type `Barrel` and associated functions
 #include "mbm/game.h"             // type `Game` and associated functions
 #include "mbm/ground.h"           // type `Ground` and associated functions
 #include "mbm/moon.h"             // type `Moon` and associated functions
@@ -25,6 +26,7 @@ typedef void (*UpdateFunction)(struct game * game, SDL_Window * window);
 // declare properties of `struct game`
 struct game {
     Background * background;
+    Barrel * barrel;
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     Ground * ground;
@@ -56,6 +58,7 @@ void game_delete (struct game ** self) {
     background_delete(&(*self)->background);
     spritesheet_delete(&(*self)->spritesheet);
     turret_delete(&(*self)->turret);
+    barrel_delete(&(*self)->barrel);
 
     // release own resources
     free(*self);
@@ -72,6 +75,7 @@ static void game_draw_lobby (struct game * self, SDL_Renderer * renderer) {
     ground_draw(self->ground, renderer);
     moon_draw(self->moon, self->spritesheet, renderer);
     turret_draw(self->turret, self->spritesheet, renderer);
+    barrel_draw(self->barrel, self->spritesheet, renderer);
 }
 
 static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
@@ -80,6 +84,7 @@ static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
     ground_draw(self->ground, renderer);
     moon_draw(self->moon, self->spritesheet, renderer);
     turret_draw(self->turret, self->spritesheet, renderer);
+    barrel_draw(self->barrel, self->spritesheet, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Event * event) {
@@ -153,6 +158,10 @@ void game_init (struct game * self, SDL_Renderer * renderer) {
     // initialize the turret
     self->turret = turret_new();
     turret_init(self->turret, self->scene, self->ground);
+
+    // initialize the barrel
+    self->barrel = barrel_new();
+    barrel_init(self->barrel, self->spritesheet, self->turret);
 }
 
 struct game * game_new (void) {
@@ -178,6 +187,7 @@ static void game_update_lobby (struct game * self, SDL_Window * window) {
     ground_update(self->ground, self->scene);
     moon_update(self->moon, self->scene);
     turret_update(self->turret, self->scene);
+    barrel_update(self->barrel, self->scene);
 }
 
 static void game_update_playing (struct game * self, SDL_Window * window) {
@@ -186,4 +196,5 @@ static void game_update_playing (struct game * self, SDL_Window * window) {
     ground_update(self->ground, self->scene);
     moon_update(self->moon, self->scene);
     turret_update(self->turret, self->scene);
+    barrel_update(self->barrel, self->scene);
 }

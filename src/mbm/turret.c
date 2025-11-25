@@ -27,6 +27,22 @@ void turret_draw (struct turret * self, struct spritesheet * spritesheet, SDL_Re
     SDL_RenderTexture(renderer, texture, src, &self->tgt);
 }
 
+float turret_get_sim_w (struct turret * self) {
+    return self->sim.w;
+}
+
+float turret_get_sim_h (struct turret * self) {
+    return self->sim.h;
+}
+
+float turret_get_sim_x (struct turret * self) {
+    return self->sim.x;
+}
+
+float turret_get_sim_y (struct turret * self) {
+    return self->sim.y;
+}
+
 void turret_init (struct turret * self, struct scene * scene, struct ground * ground) {
     const float height = 47.0;
     *self = (struct turret) {

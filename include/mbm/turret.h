@@ -14,6 +14,10 @@ typedef struct turret Turret;
 
 MBM_ABI void turret_delete (struct turret ** self);
 MBM_ABI void turret_draw (struct turret * self, struct spritesheet * spritesheet, SDL_Renderer * renderer);
+MBM_ABI float turret_get_sim_w (struct turret * self);
+MBM_ABI float turret_get_sim_h (struct turret * self);
+MBM_ABI float turret_get_sim_x (struct turret * self);
+MBM_ABI float turret_get_sim_y (struct turret * self);
 MBM_ABI void turret_init (struct turret * self, struct scene * scene, struct ground * ground);
 MBM_ABI struct turret * turret_new (void);
 MBM_ABI void turret_update (struct turret * self, struct scene * scene);

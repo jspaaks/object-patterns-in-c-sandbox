@@ -59,6 +59,7 @@ target_sources(
     PRIVATE
         background.c
         balloon.c
+        barrel.c
         game.c
         ground.c
         moon.c
@@ -74,6 +75,7 @@ target_sources(
             FILES
                 ../../include/mbm/background.h
                 ../../include/mbm/balloon.h
+                ../../include/mbm/barrel.h
                 ../../include/mbm/game.h
                 ../../include/mbm/ground.h
                 ../../include/mbm/moon.h
