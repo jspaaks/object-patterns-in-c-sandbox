@@ -13,10 +13,10 @@ struct game;
 typedef struct game Game;
 
 MBM_ABI void game_delete (struct game ** self);
-MBM_ABI void game_draw (struct game * self);
+MBM_ABI void game_draw (struct game * self, SDL_Renderer * renderer);
 MBM_ABI SDL_AppResult game_handle_event (struct game * self, SDL_Event * event);
-MBM_ABI void game_init (struct game * self, SDL_Window * window, SDL_Renderer * renderer);
+MBM_ABI void game_init (struct game * self, SDL_Renderer * renderer);
 MBM_ABI struct game * game_new (void);
-MBM_ABI void game_update (struct game * self);
+MBM_ABI void game_update (struct game * self, SDL_Window * window);
 
 #endif
