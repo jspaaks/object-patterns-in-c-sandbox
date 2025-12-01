@@ -58,14 +58,9 @@ target_sources(
     tgt_lib_mbm
     PRIVATE
         background.c
-        balloon.c
-        barrel.c
         game.c
-        ground.c
-        moon.c
         scene.c
-        spritesheet.c
-        turret.c
+        tiles.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
             TYPE HEADERS
@@ -74,14 +69,9 @@ target_sources(
                 ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
             FILES
                 ../../include/mbm/background.h
-                ../../include/mbm/balloon.h
-                ../../include/mbm/barrel.h
                 ../../include/mbm/game.h
-                ../../include/mbm/ground.h
-                ../../include/mbm/moon.h
                 ../../include/mbm/scene.h
-                ../../include/mbm/spritesheet.h
-                ../../include/mbm/turret.h
+                ../../include/mbm/tiles.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )
 

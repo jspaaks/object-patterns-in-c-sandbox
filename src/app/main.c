@@ -1,4 +1,3 @@
-#include "mbm/balloon.h"          // type `Balloon` and associated functions
 #include "mbm/game.h"             // type `Game` and associated functions
 #include <SDL3/SDL_error.h>       // function `SDL_GetError`
 #include <SDL3/SDL_events.h>      // type `SDL_Event`

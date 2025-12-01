@@ -50,8 +50,6 @@ target_link_options(
 target_sources(
     tgt_exe_test_mbm
     PRIVATE
-        test_balloon.c
-        test_spritesheet.c
 )
 
 add_test(

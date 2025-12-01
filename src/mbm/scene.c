@@ -65,8 +65,8 @@ float scene_get_tgt_y (struct scene * self) {
 }
 
 void scene_init (struct scene * self) {
-    const int height = 720;
-    const int width = 1280;
+    const int height = 24 * 32;
+    const int width = 40 * 32;
     *self = (struct scene) {
         .color = (SDL_Color) {
             .r = 0,
