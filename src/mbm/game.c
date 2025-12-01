@@ -1,6 +1,5 @@
 #include "mbm/background.h"       // type `Background` and associated functions
 #include "mbm/game.h"             // type `Game` and associated functions
-#include "mbm/scene.h"            // type `Scene` and associated functions
 #include "mbm/tiles.h"            // type `Tiles` and associated functions
 #include <SDL3/SDL_events.h>      // type `SDL_Event`
 #include <SDL3/SDL_init.h>        // type `SDL_AppResult`
@@ -25,7 +24,6 @@ struct game {
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     State state;
-    Scene * scene;
     Tiles * tiles;
     UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
@@ -44,7 +42,6 @@ static void game_update_playing (struct game * self, SDL_Window * window);
 void game_delete (struct game ** self) {
 
     // delegate freeing dynamically allocated memory to the respective objects
-    scene_delete(&(*self)->scene);
     background_delete(&(*self)->background);
     tiles_delete(&(*self)->tiles);
 
@@ -59,14 +56,12 @@ void game_draw (struct game * self, SDL_Renderer * renderer) {
 
 static void game_draw_lobby (struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
-    scene_draw(self->scene, renderer);
-    tiles_draw(self->tiles, self->scene, renderer);
+    tiles_draw(self->tiles, renderer);
 }
 
 static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
-    scene_draw(self->scene, renderer);
-    tiles_draw(self->tiles, self->scene, renderer);
+    tiles_draw(self->tiles, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Event * event) {
@@ -117,10 +112,6 @@ void game_init (struct game * self, SDL_Renderer * renderer) {
     // initialize the gamestate
     self->state = MBM_GAME_STATE_LOBBY;
 
-    // initialize the scene
-    self->scene = scene_new();
-    scene_init(self->scene);
-
     // initialize the background
     self->background = background_new();
     background_init(self->background);
@@ -149,12 +140,10 @@ void game_update (struct game * self, SDL_Window * window) {
 
 static void game_update_lobby (struct game * self, SDL_Window * window) {
     background_update(self->background);
-    scene_update(self->scene, window);
     tiles_update(self->tiles);
 }
 
 static void game_update_playing (struct game * self, SDL_Window * window) {
     background_update(self->background);
-    scene_update(self->scene, window);
     tiles_update(self->tiles);
 }

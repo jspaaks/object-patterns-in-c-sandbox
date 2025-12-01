@@ -18,14 +18,16 @@ typedef enum {
 // declare properties of `struct tiles`
 struct tiles {
     SDL_Texture * index;
-    SDL_FRect rects[TILE_TYPE_COUNT];
+    int ncols;
+    int nrows;
+    SDL_FRect srcs[TILE_TYPE_COUNT];
+    int tile_height;
     TileType ** tile_types;
     TileType * tile_types_mem;
-    int nrows;
-    int ncols;
+    int tile_width;
 };
 
-// define pointer to singleton instance of `struct singleton`
+// define pointer to singleton instance of `struct tiles`
 static struct tiles * singleton = nullptr;
 
 void tiles_delete (struct tiles ** self) {
@@ -46,23 +48,29 @@ void tiles_delete (struct tiles ** self) {
     *self = nullptr;
 }
 
-void tiles_draw (struct tiles * self, struct scene *, SDL_Renderer * renderer) {
+void tiles_draw (struct tiles * self, SDL_Renderer * renderer) {
     for (int irow = 0; irow < self->nrows; irow++) {
         for (int icol = 0; icol < self->ncols; icol++) {
             TileType t = self->tile_types[irow][icol];
-            SDL_FRect src = self->rects[t];
-            SDL_FRect tgt = {
-                .h = 32.0f,
-                .w = 32.0f,
-                .x = icol * 32.0f,
-                .y = irow * 32.0f,
+            SDL_FRect src = self->srcs[t];
+            SDL_FRect wld = {
+                .h = (float) (self->tile_height),
+                .w = (float) (self->tile_width),
+                .x = (float) (icol * self->tile_width) - 16,
+                .y = (float) (irow * self->tile_height),
             };
-            SDL_RenderTexture(renderer, self->index, &src, &tgt);
+            SDL_RenderTexture(renderer, self->index, &src, &wld);
         }
     }
 }
 
 void tiles_init (struct tiles * self, SDL_Renderer * renderer) {
+    {
+        self->nrows = 12;
+        self->ncols = 30;
+        self->tile_height = 32;
+        self->tile_width = 32;
+    }
     {
         const char * relpath = "../share/mbm/assets/images/tiles.bmp";
         char * path = nullptr;
@@ -85,22 +93,20 @@ void tiles_init (struct tiles * self, SDL_Renderer * renderer) {
         path = nullptr;
     }
     {
-        self->rects[TILE_TYPE_AIR] = (SDL_FRect) {
-            .h = 32.0f,
-            .w = 32.0f,
-            .x = 0.0f,
-            .y = 0.0f,
+        self->srcs[TILE_TYPE_AIR] = (SDL_FRect) {
+            .h = (float) (self->tile_height - 2),
+            .w = (float) (self->tile_width - 2),
+            .x = 1.0f,
+            .y = 1.0f,
         };
-        self->rects[TILE_TYPE_GROUND] = (SDL_FRect) {
-            .h = 32.0f,
-            .w = 32.0f,
-            .x = 32.0f,
-            .y = 0.0f,
+        self->srcs[TILE_TYPE_GROUND] = (SDL_FRect) {
+            .h = (float) (self->tile_height - 2),
+            .w = (float) (self->tile_width - 2),
+            .x = 32.0f + 10.0f + 1.0f,
+            .y = 1.0f,
         };
     }
     {
-        self->nrows = 24;
-        self->ncols = 40;
         self->tile_types_mem = (TileType *) calloc(self->nrows * self->ncols, sizeof(TileType));
         self->tile_types = (TileType **) calloc(self->nrows, sizeof(TileType *));
         for (int irow = 0; irow < self->nrows; irow++) {
@@ -108,7 +114,7 @@ void tiles_init (struct tiles * self, SDL_Renderer * renderer) {
         }
         for (int irow = 0; irow < self->nrows; irow++) {
             for (int icol = 0; icol < self->ncols; icol++) {
-                if (irow == self->nrows - 1) {
+                if (irow == icol % self->nrows) {
                     self->tile_types[irow][icol] = TILE_TYPE_GROUND;
                 } else {
                     self->tile_types[irow][icol] = TILE_TYPE_AIR;
@@ -131,4 +137,4 @@ struct tiles * tiles_new (void) {
     return singleton;
 }
 
-void tiles_update (struct tiles * self) {}
+void tiles_update (struct tiles *) {}

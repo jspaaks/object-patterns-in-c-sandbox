@@ -59,7 +59,6 @@ target_sources(
     PRIVATE
         background.c
         game.c
-        scene.c
         tiles.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
@@ -70,7 +69,6 @@ target_sources(
             FILES
                 ../../include/mbm/background.h
                 ../../include/mbm/game.h
-                ../../include/mbm/scene.h
                 ../../include/mbm/tiles.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )

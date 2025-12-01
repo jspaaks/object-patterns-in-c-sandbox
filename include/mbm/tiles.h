@@ -1,7 +1,6 @@
 #ifndef MBM_TILES_H_INCLUDED
 #define MBM_TILES_H_INCLUDED
 #include "mbm/abi.h"
-#include "mbm/scene.h"            // type `struct scene` and associated functions
 #include "SDL3/SDL_rect.h"        // type `SDL_Rect`
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`, `SDL_Texture`
 
@@ -12,7 +11,7 @@ struct tiles;
 typedef struct tiles Tiles;
 
 MBM_ABI void tiles_delete (struct tiles ** self);
-MBM_ABI void tiles_draw (struct tiles * self, struct scene * scene, SDL_Renderer * renderer);
+MBM_ABI void tiles_draw (struct tiles * self, SDL_Renderer * renderer);
 MBM_ABI void tiles_init (struct tiles * self, SDL_Renderer * renderer);
 MBM_ABI struct tiles * tiles_new (void);
 MBM_ABI void tiles_update (struct tiles * self);
