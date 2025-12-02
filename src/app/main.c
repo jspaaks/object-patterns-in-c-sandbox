@@ -13,15 +13,14 @@
 
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
-static Game * game = nullptr;
 
 // `SDL_AppEvent` runs when a new event (mouse input, keypresses, etc) occurs
-SDL_AppResult SDL_AppEvent(void * appstate, SDL_Event * event) {
-    return game_handle_event(game, event);
+SDL_AppResult SDL_AppEvent(void * game, SDL_Event * event) {
+    return game_handle_event((Game *) game, event);
 }
 
 // `SDL_AppInit` runs once at startup
-SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
+SDL_AppResult SDL_AppInit(void ** game, int argc, char * argv[]) {
 
     const int view_width = 640;
     const int view_height = 386;
@@ -56,21 +55,21 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
     }
 
     // initialize the game object
-    game = game_new();
-    game_init(game, renderer, view_width, view_height);
+    *game = (void *) game_new();
+    game_init(*(Game **) game, renderer, view_width, view_height);
 
     // continue with the rest of the program
     return SDL_APP_CONTINUE;
 }
 
 // `SDL_AppIterate` runs once per frame, and is the heart of the program
-SDL_AppResult SDL_AppIterate(void * appstate) {
+SDL_AppResult SDL_AppIterate(void * game) {
 
     // update relevant objects
-    game_update(game);
+    game_update((Game *) game);
 
     // draw relevant objects
-    game_draw(game, renderer);
+    game_draw((Game *) game, renderer);
 
     // update the screen with this frame's rendering
     SDL_RenderPresent(renderer);
@@ -81,7 +80,7 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
 }
 
 // SDL_AppQuit runs once at shutdown
-void SDL_AppQuit(void * appstate, SDL_AppResult result) {
-    game_delete(&game);
+void SDL_AppQuit(void * game, SDL_AppResult result) {
+    game_delete((Game **) &game);
     // SDL will clean up the window and renderer for us
 }
