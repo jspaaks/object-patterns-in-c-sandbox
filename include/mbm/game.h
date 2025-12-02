@@ -1,6 +1,7 @@
 #ifndef MBM_GAME_H_INCLUDED
 #define MBM_GAME_H_INCLUDED
 #include "mbm/abi.h"
+#include "mbm/world.h"            // type `World` and associated functions
 #include <SDL3/SDL_events.h>      // type `SDL_Event`
 #include <SDL3/SDL_init.h>        // type `SDL_AppResult`
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`

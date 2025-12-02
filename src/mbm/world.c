@@ -17,6 +17,7 @@ typedef enum {
 
 // declare properties of `struct world`
 struct world {
+    int h;
     int ncols;
     int nrows;
     struct {
@@ -26,7 +27,14 @@ struct world {
         TileType ** types;
         int width;
     } tile;
-    SDL_FRect view;
+    struct {
+        int dx;
+        int h;
+        int w;
+        int x;
+        int y;
+    } view;
+    int w;
 };
 
 // forward declaration of static functions
@@ -114,7 +122,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, int view_width, i
     int tile_width = 32;
     int tile_height = tile_width;
     int nrows = view_height / tile_height;
-    int ncols = 25;
+    int ncols = 48;
 
     // load the tile index into a texture 
     SDL_Texture * index = load_tile_index("../share/mbm/assets/images/tiles.bmp", renderer);
@@ -136,6 +144,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, int view_width, i
     }
 
     *self = (struct world) {
+        .h = view_height,
         .ncols = ncols,
         .nrows = nrows,
         .tile = {
@@ -158,13 +167,27 @@ void world_init (struct world * self, SDL_Renderer * renderer, int view_width, i
             .types = tile_types,
             .width = tile_width,
         },
-        .view = (SDL_FRect) {
+        .view = {
+            .dx = 16,
             .h = view_height,
             .w = view_width,
             .x = 0,
             .y = 0,
         },
+        .w = ncols * tile_width,
     };
+}
+
+void world_move_view_left (struct world * self) {
+    int a = 0;
+    int b = self->view.x - self->view.dx;
+    self->view.x = MAX(a, b);
+}
+
+void world_move_view_right (struct world * self) {
+    int a = self->view.x + self->view.dx;
+    int b = self->w - self->view.w;
+    self->view.x = MIN(a, b);
 }
 
 struct world * world_new (void) {
@@ -180,9 +203,4 @@ struct world * world_new (void) {
     return singleton;
 }
 
-void world_update (struct world * self) {
-    float a = self->view.x;
-    float b = self->view.x + 0.1;
-    float c = self->ncols * self->tile.width - self->view.w;
-    self->view.x = MIN(MAX(a, b),c);
-}
+void world_update (struct world *) {}

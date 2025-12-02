@@ -13,6 +13,8 @@ typedef struct world World;
 MBM_ABI void world_delete (struct world ** self);
 MBM_ABI void world_draw (struct world * self, SDL_Renderer * renderer);
 MBM_ABI void world_init (struct world * self, SDL_Renderer * renderer, int view_width, int view_height);
+MBM_ABI void world_move_view_left (struct world * self);
+MBM_ABI void world_move_view_right (struct world * self);
 MBM_ABI struct world * world_new (void);
 MBM_ABI void world_update (struct world * self);
 
