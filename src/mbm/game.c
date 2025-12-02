@@ -3,6 +3,7 @@
 #include "mbm/world.h"            // type `World` and associated functions
 #include <SDL3/SDL_events.h>      // type `SDL_Event`
 #include <SDL3/SDL_init.h>        // type `SDL_AppResult`
+#include <SDL3/SDL_keyboard.h>    // function `SDL_GetKeyboardState`
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`
 #include <SDL3/SDL_video.h>       // type `SDL_Window`
 #include <stdio.h>
@@ -15,7 +16,7 @@ typedef enum {
 } State;
 
 typedef void (*DrawFunction)(struct game * game, SDL_Renderer * renderer);
-typedef SDL_AppResult (*HandleEventFunction)(SDL_Event * event, struct world * world);
+typedef SDL_AppResult (*HandleEventFunction)(SDL_Event * event);
 typedef void (*UpdateFunction)(struct game * game);
 
 // declare properties of `struct game`
@@ -34,8 +35,8 @@ static struct game * singleton = nullptr;
 // forward function declarations
 static void game_draw_paused (struct game * self, SDL_Renderer * renderer);
 static void game_draw_playing (struct game * self, SDL_Renderer * renderer);
-static SDL_AppResult game_handle_event_paused (SDL_Event * event, struct world * world);
-static SDL_AppResult game_handle_event_playing (SDL_Event * event, struct world * world);
+static SDL_AppResult game_handle_event_paused (SDL_Event * event);
+static SDL_AppResult game_handle_event_playing (SDL_Event * event);
 static void game_update_paused (struct game * self);
 static void game_update_playing (struct game * self);
 
@@ -65,33 +66,27 @@ static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Event * event) {
-    return self->handle_event_functions[self->state](event, self->world);
+    return self->handle_event_functions[self->state](event);
 }
 
-static SDL_AppResult game_handle_event_paused (SDL_Event * event, struct world *) {
+static SDL_AppResult game_handle_event_paused (SDL_Event * event) {
     switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
         case SDL_EVENT_KEY_DOWN:
-            if (event->key.scancode == SDL_SCANCODE_Q) {
-                return SDL_APP_SUCCESS;
-            }
+            if (event->key.key == SDLK_ESCAPE || event->key.key == SDLK_Q)
+            return SDL_APP_SUCCESS;
     }
     return SDL_APP_CONTINUE;
 }
 
-static SDL_AppResult game_handle_event_playing (SDL_Event * event, struct world * world) {
+static SDL_AppResult game_handle_event_playing (SDL_Event * event) {
     switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
         case SDL_EVENT_KEY_DOWN:
-            if (event->key.scancode == SDL_SCANCODE_Q) {
-                return SDL_APP_SUCCESS;
-            } else if (event->key.scancode == SDL_SCANCODE_LEFT) {
-                world_move_view_left(world);
-            } else if (event->key.scancode == SDL_SCANCODE_RIGHT) {
-                world_move_view_right(world);
-            }
+            if (event->key.key == SDLK_ESCAPE || event->key.key == SDLK_Q)
+            return SDL_APP_SUCCESS;
     }
     return SDL_APP_CONTINUE;
 }
@@ -145,6 +140,13 @@ void game_update (struct game * self) {
 static void game_update_paused (struct game *) {}
 
 static void game_update_playing (struct game * self) {
+    const bool * key_states = SDL_GetKeyboardState(nullptr);
+    if (key_states[SDL_SCANCODE_LEFT]) {
+        world_move_view_left(self->world);
+    }
+    if (key_states[SDL_SCANCODE_RIGHT]) {
+        world_move_view_right(self->world);
+    }
     background_update(self->background);
     world_update(self->world);
 }

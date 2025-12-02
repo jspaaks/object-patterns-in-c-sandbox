@@ -168,7 +168,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, int view_width, i
             .width = tile_width,
         },
         .view = {
-            .dx = 16,
+            .dx = 1,
             .h = view_height,
             .w = view_width,
             .x = 0,

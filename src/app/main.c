@@ -6,6 +6,7 @@
 #define SDL_MAIN_USE_CALLBACKS 1  // use the callbacks instead of main()
 #include <SDL3/SDL_main.h>        // definition of main() that calls the callback functions
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`
+#include <SDL3/SDL_timer.h>       // type `SDL_Delay`
 #include <SDL3/SDL_video.h>       // types `SDL_Window`, `SDL_WindowFlags`, defines
 #include <SDL3/SDL.h>
 #include <stdlib.h>               // atexit
@@ -73,6 +74,8 @@ SDL_AppResult SDL_AppIterate(void * appstate) {
 
     // update the screen with this frame's rendering
     SDL_RenderPresent(renderer);
+
+    SDL_Delay(10);
 
     return SDL_APP_CONTINUE;
 }
