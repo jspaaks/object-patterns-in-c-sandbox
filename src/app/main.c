@@ -8,16 +8,11 @@
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`
 #include <SDL3/SDL_video.h>       // types `SDL_Window`, `SDL_WindowFlags`, defines
 #include <SDL3/SDL.h>
+#include <stdlib.h>               // atexit
 
 static SDL_Window * window = nullptr;
 static SDL_Renderer * renderer = nullptr;
 static Game * game = nullptr;
-static SDL_FRect wld = (SDL_FRect) {
-    .h = 12 * 32,
-    .w = 20 * 32,
-    .x = 0,
-    .y = 0,
-};
 
 // `SDL_AppEvent` runs when a new event (mouse input, keypresses, etc) occurs
 SDL_AppResult SDL_AppEvent(void * appstate, SDL_Event * event) {
@@ -26,6 +21,13 @@ SDL_AppResult SDL_AppEvent(void * appstate, SDL_Event * event) {
 
 // `SDL_AppInit` runs once at startup
 SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
+
+    const int view_width = 640;
+    const int view_height = 386;
+
+    // register SDL_Quit function to run at exit
+    atexit(SDL_Quit);
+
     SDL_SetAppMetadata("SDL3 demo", "1.0", "com.github.jspaaks.mbm");
 
     // initialize the subsystems
@@ -49,12 +51,12 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
             SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
             return SDL_APP_FAILURE;
         }
-        SDL_SetRenderLogicalPresentation(renderer, wld.w, wld.h, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+        SDL_SetRenderLogicalPresentation(renderer, view_width, view_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     }
 
     // initialize the game object
     game = game_new();
-    game_init(game, renderer);
+    game_init(game, renderer, view_width, view_height);
 
     // continue with the rest of the program
     return SDL_APP_CONTINUE;
@@ -64,7 +66,7 @@ SDL_AppResult SDL_AppInit(void ** appstate, int argc, char * argv[]) {
 SDL_AppResult SDL_AppIterate(void * appstate) {
 
     // update relevant objects
-    game_update(game, window);
+    game_update(game);
 
     // draw relevant objects
     game_draw(game, renderer);

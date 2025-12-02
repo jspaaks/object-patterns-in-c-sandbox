@@ -1,6 +1,6 @@
 #include "mbm/background.h"       // type `Background` and associated functions
 #include "mbm/game.h"             // type `Game` and associated functions
-#include "mbm/tiles.h"            // type `Tiles` and associated functions
+#include "mbm/world.h"            // type `World` and associated functions
 #include <SDL3/SDL_events.h>      // type `SDL_Event`
 #include <SDL3/SDL_init.h>        // type `SDL_AppResult`
 #include <SDL3/SDL_render.h>      // type `SDL_Renderer`
@@ -9,14 +9,14 @@
 #include <stdlib.h>
 
 typedef enum {
-    MBM_GAME_STATE_LOBBY,
     MBM_GAME_STATE_PLAYING,
+    MBM_GAME_STATE_PAUSED,
     MBM_GAME_STATE_LEN,
 } State;
 
 typedef void (*DrawFunction)(struct game * game, SDL_Renderer * renderer);
 typedef SDL_AppResult (*HandleEventFunction)(SDL_Event * event);
-typedef void (*UpdateFunction)(struct game * game, SDL_Window * window);
+typedef void (*UpdateFunction)(struct game * game);
 
 // declare properties of `struct game`
 struct game {
@@ -24,7 +24,7 @@ struct game {
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     State state;
-    Tiles * tiles;
+    World * world;
     UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
 
@@ -32,18 +32,18 @@ struct game {
 static struct game * singleton = nullptr;
 
 // forward function declarations
-static void game_draw_lobby (struct game * self, SDL_Renderer * renderer);
+static void game_draw_paused (struct game * self, SDL_Renderer * renderer);
 static void game_draw_playing (struct game * self, SDL_Renderer * renderer);
-static SDL_AppResult game_handle_event_lobby (SDL_Event * event);
+static SDL_AppResult game_handle_event_paused (SDL_Event * event);
 static SDL_AppResult game_handle_event_playing (SDL_Event * event);
-static void game_update_lobby (struct game * self, SDL_Window * window);
-static void game_update_playing (struct game * self, SDL_Window * window);
+static void game_update_paused (struct game * self);
+static void game_update_playing (struct game * self);
 
 void game_delete (struct game ** self) {
 
     // delegate freeing dynamically allocated memory to the respective objects
     background_delete(&(*self)->background);
-    tiles_delete(&(*self)->tiles);
+    world_delete(&(*self)->world);
 
     // release own resources
     free(*self);
@@ -54,21 +54,21 @@ void game_draw (struct game * self, SDL_Renderer * renderer) {
     self->draw_functions[self->state](self, renderer);
 }
 
-static void game_draw_lobby (struct game * self, SDL_Renderer * renderer) {
+static void game_draw_paused (struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
-    tiles_draw(self->tiles, renderer);
+    world_draw(self->world, renderer);
 }
 
 static void game_draw_playing (struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
-    tiles_draw(self->tiles, renderer);
+    world_draw(self->world, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Event * event) {
     return self->handle_event_functions[self->state](event);
 }
 
-static SDL_AppResult game_handle_event_lobby (SDL_Event * event) {
+static SDL_AppResult game_handle_event_paused (SDL_Event * event) {
     switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
@@ -87,38 +87,40 @@ static SDL_AppResult game_handle_event_playing (SDL_Event * event) {
         case SDL_EVENT_KEY_DOWN:
             if (event->key.scancode == SDL_SCANCODE_Q) {
                 return SDL_APP_SUCCESS;
+            } else if (event->key.scancode == SDL_SCANCODE_LEFT) {
+                
             }
     }
     return SDL_APP_CONTINUE;
 }
 
-void game_init (struct game * self, SDL_Renderer * renderer) {
+void game_init (struct game * self, SDL_Renderer * renderer, int view_width, int view_height) {
 
     // empty-initialize the singleton instance of `struct game`
     *self = (struct game) {};
 
     // initialize the state-based indirection to static draw functions
-    self->draw_functions[MBM_GAME_STATE_LOBBY] = game_draw_lobby;
+    self->draw_functions[MBM_GAME_STATE_PAUSED] = game_draw_paused;
     self->draw_functions[MBM_GAME_STATE_PLAYING] = game_draw_playing;
 
     // initialize the state-based indirection to static update functions
-    self->handle_event_functions[MBM_GAME_STATE_LOBBY] = game_handle_event_lobby;
+    self->handle_event_functions[MBM_GAME_STATE_PAUSED] = game_handle_event_paused;
     self->handle_event_functions[MBM_GAME_STATE_PLAYING] = game_handle_event_playing;
 
     // initialize the state-based indirection to static update functions
-    self->update_functions[MBM_GAME_STATE_LOBBY] = game_update_lobby;
+    self->update_functions[MBM_GAME_STATE_PAUSED] = game_update_paused;
     self->update_functions[MBM_GAME_STATE_PLAYING] = game_update_playing;
 
     // initialize the gamestate
-    self->state = MBM_GAME_STATE_LOBBY;
+    self->state = MBM_GAME_STATE_PLAYING;
 
     // initialize the background
     self->background = background_new();
     background_init(self->background);
 
-    // initialize the tiles
-    self->tiles = tiles_new();
-    tiles_init(self->tiles, renderer);
+    // initialize the world
+    self->world = world_new();
+    world_init(self->world, renderer, view_width, view_height);
 }
 
 struct game * game_new (void) {
@@ -134,16 +136,13 @@ struct game * game_new (void) {
     return singleton;
 }
 
-void game_update (struct game * self, SDL_Window * window) {
-    self->update_functions[self->state](self, window);
+void game_update (struct game * self) {
+    self->update_functions[self->state](self);
 }
 
-static void game_update_lobby (struct game * self, SDL_Window * window) {
-    background_update(self->background);
-    tiles_update(self->tiles);
-}
+static void game_update_paused (struct game *) {}
 
-static void game_update_playing (struct game * self, SDL_Window * window) {
+static void game_update_playing (struct game * self) {
     background_update(self->background);
-    tiles_update(self->tiles);
+    world_update(self->world);
 }
