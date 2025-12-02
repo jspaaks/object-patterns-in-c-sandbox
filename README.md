@@ -86,3 +86,13 @@ $ cmake -DMBM_WITH_ASAN=ON ..
 ## Acknowledgements
 
 _This project was initialized using [Copier](https://pypi.org/project/copier) and the [copier-template-for-c-projects](https://github.com/jspaaks/copier-template-for-c-projects)._
+
+
+<!--
+
+TODO
+
+1. animated sprites
+1. collision detection
+
+-->
