@@ -26,7 +26,7 @@
      showgrid="false"
      inkscape:zoom="17.443038"
      inkscape:cx="79"
-     inkscape:cy="16.023585"
+     inkscape:cy="16.080914"
      inkscape:window-width="3380"
      inkscape:window-height="1320"
      inkscape:window-x="30"
@@ -40,14 +40,14 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#7fe3ff;stroke-width:0.264583;fill-opacity:1"
+       style="fill:#333333;stroke-width:0.264583;fill-opacity:1"
        id="rect234"
        width="8.4666662"
        height="8.4666662"
        x="0"
        y="0" />
     <rect
-       style="fill:#b0e832;stroke-width:0.264583;fill-opacity:1"
+       style="fill:#ff0080;stroke-width:0.264583;fill-opacity:1"
        id="rect234-3"
        width="8.4666662"
        height="8.4666662"
