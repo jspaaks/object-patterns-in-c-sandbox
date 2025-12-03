@@ -1,4 +1,5 @@
 #include "mbm/world.h"
+#include "mbm/dims.h"             // Dims
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_filesystem.h"  // SDL_GetBasePath
 #include "SDL3/SDL_log.h"         // SDL_Log
@@ -21,11 +22,11 @@ struct world {
     int ncols;
     int nrows;
     struct {
-        int height;
+        int h;
         SDL_Texture * index;
         SDL_FRect srcs[TILE_TYPE_COUNT];
         TileType ** types;
-        int width;
+        int w;
     } tile;
     struct {
         int dx;
@@ -101,28 +102,26 @@ void world_delete (struct world ** self) {
 }
 
 void world_draw (struct world * self, SDL_Renderer * renderer) {
-    int icol_s = (int) (self->view.x) / self->tile.width;
-    int icol_e = MIN((int) (self->view.x + self->view.w) / self->tile.width + 1, self->ncols);
+    int icol_s = (int) (self->view.x) / self->tile.w;
+    int icol_e = MIN((int) (self->view.x + self->view.w) / self->tile.w + 1, self->ncols);
     for (int irow = 0; irow < self->nrows; irow++) {
         for (int icol = icol_s; icol < icol_e; icol++) {
             TileType t = self->tile.types[irow][icol];
             SDL_FRect src = self->tile.srcs[t];
             SDL_FRect wld = {
-                .h = (float) (self->tile.height),
-                .w = (float) (self->tile.width),
-                .x = (float) (icol * self->tile.width) - self->view.x,
-                .y = (float) (irow * self->tile.height),
+                .h = (float) (self->tile.h),
+                .w = (float) (self->tile.w),
+                .x = (float) (icol * self->tile.w) - self->view.x,
+                .y = (float) (irow * self->tile.h),
             };
             SDL_RenderTexture(renderer, self->tile.index, &src, &wld);
         }
     }
 }
 
-void world_init (struct world * self, SDL_Renderer * renderer, int view_width, int view_height) {
-    int tile_width = 32;
-    int tile_height = tile_width;
-    int nrows = view_height / tile_height;
-    int ncols = 48;
+void world_init (struct world * self, SDL_Renderer * renderer, Dims dims) {
+    int nrows = dims.view.h / dims.tile.h;
+    int ncols = dims.world.w / dims.tile.w;
 
     // load the tile index into a texture 
     SDL_Texture * index = load_tile_index("../share/mbm/assets/images/tiles.bmp", renderer);
@@ -144,37 +143,37 @@ void world_init (struct world * self, SDL_Renderer * renderer, int view_width, i
     }
 
     *self = (struct world) {
-        .h = view_height,
+        .h = dims.world.h,
         .ncols = ncols,
         .nrows = nrows,
         .tile = {
-            .height = tile_height,
+            .h = dims.tile.h,
             .index = index,
             .srcs = {
                 [TILE_TYPE_AIR] = (SDL_FRect) {
-                    .h = (float) (tile_height - 2),
-                    .w = (float) (tile_width - 2),
+                    .h = (float) (dims.tile.h - 2),
+                    .w = (float) (dims.tile.w - 2),
                     .x = 1.0f,
                     .y = 1.0f,
                 },
                 [TILE_TYPE_GROUND] = (SDL_FRect) {
-                    .h = (float) (tile_height - 2),
-                    .w = (float) (tile_width - 2),
+                    .h = (float) (dims.tile.h - 2),
+                    .w = (float) (dims.tile.w - 2),
                     .x = 32.0f + 10.0f + 1.0f,
                     .y = 1.0f,
                 },
             },
             .types = tile_types,
-            .width = tile_width,
+            .w = dims.tile.w,
         },
         .view = {
             .dx = 1,
-            .h = view_height,
-            .w = view_width,
+            .h = dims.view.h,
+            .w = dims.view.w,
             .x = 0,
             .y = 0,
         },
-        .w = ncols * tile_width,
+        .w = dims.world.w,
     };
 }
 

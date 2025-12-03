@@ -91,7 +91,7 @@ static SDL_AppResult game_handle_event_playing (SDL_Event * event) {
     return SDL_APP_CONTINUE;
 }
 
-void game_init (struct game * self, SDL_Renderer * renderer, int view_width, int view_height) {
+void game_init (struct game * self, SDL_Renderer * renderer, Dims dims) {
 
     // empty-initialize the singleton instance of `struct game`
     *self = (struct game) {};
@@ -117,7 +117,7 @@ void game_init (struct game * self, SDL_Renderer * renderer, int view_width, int
 
     // initialize the world
     self->world = world_new();
-    world_init(self->world, renderer, view_width, view_height);
+    world_init(self->world, renderer, dims);
 }
 
 struct game * game_new (void) {

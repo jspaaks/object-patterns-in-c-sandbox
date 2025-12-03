@@ -53,10 +53,24 @@ SDL_AppResult SDL_AppInit(void ** appstate_vpp, int argc, char * argv[]) {
     (void) argc;
     (void) argv;
 
-    const int view_width = 640;
-    const int view_height = 386;
-    const int window_width = 800;
-    const int window_height = 360;
+    const Dims dims = (Dims) {
+        .tile = {
+            .h = 32,
+            .w = 32,
+        },
+        .view = {
+            .h = 386,
+            .w = 640,
+        },
+        .window = {
+            .h = 360,
+            .w = 800,
+        },
+        .world = {
+            .h = 386,
+            .w = 1536,
+        }
+    };
 
     Game * game = nullptr;
     SDL_Renderer * renderer = nullptr;
@@ -75,13 +89,13 @@ SDL_AppResult SDL_AppInit(void ** appstate_vpp, int argc, char * argv[]) {
     init_sdl_subsystems(init_flags);
 
     // initialize the window and renderer
-    init_sdl_window_and_renderer(window_flags, window_width, window_height,
-                                 view_width, view_height,
+    init_sdl_window_and_renderer(window_flags, dims.window.w, dims.window.h,
+                                 dims.view.w, dims.view.h,
                                  &renderer, &window);
 
     // initialize the game object
     game = game_new();
-    game_init(game, renderer, view_width, view_height);
+    game_init(game, renderer, dims);
 
     // facilitate sharing state between callbacks via void ** appstate_vpp
     *appstate_vpp = (void *) calloc(1, sizeof(AppState));
