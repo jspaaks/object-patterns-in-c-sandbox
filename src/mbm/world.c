@@ -169,7 +169,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
             .w = dims->tile.w,
         },
         .view = {
-            .dx = 64,
+            .dx = 50.3,
             .h = dims->view.h,
             .w = dims->view.w,
             .x = 0.0f,

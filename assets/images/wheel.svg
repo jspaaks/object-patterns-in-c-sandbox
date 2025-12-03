@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666665 8.4666666"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   sodipodi:docname="wheel.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     showgrid="false"
+     shape-rendering="crispEdges"
+     inkscape:zoom="17.453125"
+     inkscape:cx="22.116383"
+     inkscape:cy="16.70188"
+     inkscape:window-width="3380"
+     inkscape:window-height="1320"
+     inkscape:window-x="30"
+     inkscape:window-y="50"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       sodipodi:type="star"
+       style="fill:#d35f5f;stroke-width:0.264583"
+       id="path527"
+       inkscape:flatsided="false"
+       sodipodi:sides="5"
+       sodipodi:cx="3.997031"
+       sodipodi:cy="3.7805707"
+       sodipodi:r1="5.4634209"
+       sodipodi:r2="4.2501922"
+       sodipodi:arg1="2.746875"
+       sodipodi:arg2="3.3751935"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="M -1.0462811,5.881516 -0.13772246,2.7967275 0.4404442,-0.3666763 3.6550124,-0.45583773 6.8422515,-0.8835141 7.9204053,2.1461696 9.3120608,5.0452548 6.7638282,7.0068637 4.4366795,9.2262733 1.7836314,7.4089307 Z"
+       inkscape:transform-center-x="-0.0013993882"
+       inkscape:transform-center-y="0.39427961"
+       transform="matrix(0.7757512,-0.06105295,0.06105295,0.7757512,0.73832609,1.3736084)" />
+  </g>
+</svg>

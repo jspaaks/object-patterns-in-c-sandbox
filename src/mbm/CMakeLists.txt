@@ -60,6 +60,7 @@ target_sources(
         background.c
         game.c
         timings.c
+        wheel.c
         world.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
@@ -71,6 +72,7 @@ target_sources(
                 ../../include/mbm/background.h
                 ../../include/mbm/game.h
                 ../../include/mbm/timings.h
+                ../../include/mbm/wheel.h
                 ../../include/mbm/world.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )

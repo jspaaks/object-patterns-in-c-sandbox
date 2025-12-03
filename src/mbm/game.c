@@ -1,6 +1,7 @@
 #include "mbm/background.h"       // struct background and associated functions
 #include "mbm/game.h"             // struct game and associated functions
 #include "mbm/timings.h"          // struct timings and associated functions
+#include "mbm/wheel.h"            // struct wheel and associated functions
 #include "mbm/world.h"            // struct world and associated functions
 #include "SDL3/SDL_events.h"      // SDL_Event
 #include "SDL3/SDL_init.h"        // SDL_AppResult
@@ -26,6 +27,7 @@ struct game {
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     State state;
+    struct wheel * wheel;
     struct world * world;
     UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
@@ -46,6 +48,7 @@ void game_delete (struct game ** self) {
     // delegate freeing dynamically allocated memory to the respective objects
     background_delete(&(*self)->background);
     world_delete(&(*self)->world);
+    wheel_delete(&(*self)->wheel);
 
     // release own resources
     free(*self);
@@ -57,13 +60,14 @@ void game_draw (const struct game * self, SDL_Renderer * renderer) {
 }
 
 static void game_draw_paused (const struct game * self, SDL_Renderer * renderer) {
-    background_draw(self->background, renderer);
-    world_draw(self->world, renderer);
+    (void) self;
+    (void) renderer;
 }
 
 static void game_draw_playing (const struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
     world_draw(self->world, renderer);
+    wheel_draw(self->wheel, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, const SDL_Event * event) {
@@ -119,6 +123,10 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     // initialize the world
     self->world = world_new();
     world_init(self->world, renderer, dims);
+
+    // initialize the wheel
+    self->wheel = wheel_new();
+    wheel_init(self->wheel, renderer, dims);
 }
 
 struct game * game_new (void) {
@@ -138,7 +146,10 @@ void game_update (struct game * self, const struct timings * timings) {
     self->update_functions[self->state](self, timings);
 }
 
-static void game_update_paused (struct game *, const struct timings *) {}
+static void game_update_paused (struct game * self, const struct timings * timings) {
+    (void) self;
+    (void) timings;
+}
 
 static void game_update_playing (struct game * self, const struct timings * timings) {
     const bool * key_states = SDL_GetKeyboardState(nullptr);
@@ -150,4 +161,5 @@ static void game_update_playing (struct game * self, const struct timings * timi
     }
     background_update(self->background);
     world_update(self->world);
+    wheel_update(self->wheel, timings);
 }
