@@ -1,12 +1,14 @@
 #include "mbm/world.h"
-#include "mbm/dims.h"             // Dims
+#include "mbm/dims.h"             // struct dims
+#include "mbm/timings.h"          // struct timings and associated functions
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_filesystem.h"  // SDL_GetBasePath
 #include "SDL3/SDL_log.h"         // SDL_Log
 #include "SDL3/SDL_rect.h"        // SDL_FRect
-#include <SDL3/SDL_render.h>      // SDL_Renderer, SDL_Texture, SDL_CreateTextureFromSurface, SDL_DestroyTexture, SDL_RenderTexture
+#include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_CreateTextureFromSurface, SDL_DestroyTexture, SDL_RenderTexture
 #include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_free
 #include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
+#include <stdint.h>               // uint64_t
 #include <stdlib.h>               // calloc, free, exit
 #include <sys/param.h>            // MIN
 
@@ -29,11 +31,11 @@ struct world {
         int w;
     } tile;
     struct {
-        int dx;
+        int dx;       // pixels per second
         int h;
         int w;
-        int x;
-        int y;
+        float x;
+        float y;
     } view;
     int w;
 };
@@ -101,9 +103,9 @@ void world_delete (struct world ** self) {
     *self = nullptr;
 }
 
-void world_draw (struct world * self, SDL_Renderer * renderer) {
-    int icol_s = (int) (self->view.x) / self->tile.w;
-    int icol_e = MIN((int) (self->view.x + self->view.w) / self->tile.w + 1, self->ncols);
+void world_draw (const struct world * self, SDL_Renderer * renderer) {
+    int icol_s = self->view.x / self->tile.w;
+    int icol_e = MIN(self->view.x + self->view.w / self->tile.w + 1, self->ncols);
     for (int irow = 0; irow < self->nrows; irow++) {
         for (int icol = icol_s; icol < icol_e; icol++) {
             TileType t = self->tile.types[irow][icol];
@@ -119,9 +121,9 @@ void world_draw (struct world * self, SDL_Renderer * renderer) {
     }
 }
 
-void world_init (struct world * self, SDL_Renderer * renderer, Dims dims) {
-    int nrows = dims.view.h / dims.tile.h;
-    int ncols = dims.world.w / dims.tile.w;
+void world_init (struct world * self, SDL_Renderer * renderer, const struct dims * dims) {
+    int nrows = dims->view.h / dims->tile.h;
+    int ncols = dims->world.w / dims->tile.w;
 
     // load the tile index into a texture 
     SDL_Texture * index = load_tile_index("../share/mbm/assets/images/tiles.bmp", renderer);
@@ -143,50 +145,53 @@ void world_init (struct world * self, SDL_Renderer * renderer, Dims dims) {
     }
 
     *self = (struct world) {
-        .h = dims.world.h,
+        .h = dims->world.h,
         .ncols = ncols,
         .nrows = nrows,
         .tile = {
-            .h = dims.tile.h,
+            .h = dims->tile.h,
             .index = index,
             .srcs = {
                 [TILE_TYPE_AIR] = (SDL_FRect) {
-                    .h = (float) (dims.tile.h - 2),
-                    .w = (float) (dims.tile.w - 2),
+                    .h = (float) (dims->tile.h - 2),
+                    .w = (float) (dims->tile.w - 2),
                     .x = 1.0f,
                     .y = 1.0f,
                 },
                 [TILE_TYPE_GROUND] = (SDL_FRect) {
-                    .h = (float) (dims.tile.h - 2),
-                    .w = (float) (dims.tile.w - 2),
+                    .h = (float) (dims->tile.h - 2),
+                    .w = (float) (dims->tile.w - 2),
                     .x = 32.0f + 10.0f + 1.0f,
                     .y = 1.0f,
                 },
             },
             .types = tile_types,
-            .w = dims.tile.w,
+            .w = dims->tile.w,
         },
         .view = {
-            .dx = 1,
-            .h = dims.view.h,
-            .w = dims.view.w,
-            .x = 0,
-            .y = 0,
+            .dx = 32,
+            .h = dims->view.h,
+            .w = dims->view.w,
+            .x = 0.0f,
+            .y = 0.0f,
         },
-        .w = dims.world.w,
+        .w = dims->world.w,
     };
 }
 
-void world_move_view_left (struct world * self) {
-    int a = 0;
-    int b = self->view.x - self->view.dx;
+void world_move_view_left (struct world * self, const struct timings * timings) {
+    float dt = timings_get_frame_duration(timings);
+    float a = 0;
+    float b = self->view.x - (self->view.dx * dt);
     self->view.x = MAX(a, b);
 }
 
-void world_move_view_right (struct world * self) {
-    int a = self->view.x + self->view.dx;
-    int b = self->w - self->view.w;
+void world_move_view_right (struct world * self, const struct timings * timings) {
+    float dt = timings_get_frame_duration(timings);
+    float a = self->view.x + (self->view.dx * dt);
+    float b = self->w - self->view.w;
     self->view.x = MIN(a, b);
+
 }
 
 struct world * world_new (void) {

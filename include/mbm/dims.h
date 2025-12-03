@@ -1,7 +1,7 @@
 #ifndef MBM_DIMS_H_INCLUDED
 #define MBM_DIMS_H_INCLUDED
 
-typedef struct dims {
+struct dims {
     struct {
         int h;
         int w;
@@ -18,6 +18,6 @@ typedef struct dims {
         int h;
         int w;
     } world;
- } Dims;
+};
 
 #endif
