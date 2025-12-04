@@ -3,13 +3,13 @@
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_filesystem.h"  // SDL_GetBasePath
-#include "SDL3/SDL_log.h"         // SDL_Log
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_rect.h"        // SDL_FRect
 #include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_CreateTextureFromSurface, SDL_DestroyTexture, SDL_RenderTexture
-#include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_free
+#include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_calloc, SDL_free
 #include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
 #include <stdint.h>               // uint64_t
-#include <stdlib.h>               // calloc, free, exit
+#include <stdlib.h>               // exit
 #include <sys/param.h>            // MIN
 
 typedef enum {
@@ -48,14 +48,18 @@ static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * rende
 static struct world * singleton = nullptr;
 
 static TileType ** allocate_tiles (const int nrows, const int ncols) {
-    TileType * mem = (TileType *) calloc(nrows * ncols, sizeof(TileType));
+    TileType * mem = (TileType *) SDL_calloc(nrows * ncols, sizeof(TileType));
     if (mem == nullptr) {
-        SDL_Log("Error allocating dynamic memory for contiguous memory for tile types, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Error allocating dynamic memory for contiguous memory for tile types, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
-    TileType ** tile_types = (TileType **) calloc(nrows, sizeof(TileType *));
+    TileType ** tile_types = (TileType **) SDL_calloc(nrows, sizeof(TileType *));
     if (tile_types == nullptr) {
-        SDL_Log("Error allocating dynamic memory for memory for tile types, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Error allocating dynamic memory for memory for tile types, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     for (int irow = 0; irow < nrows; ++irow) {
@@ -69,12 +73,16 @@ static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * rende
     SDL_asprintf(&path, "%s%s", SDL_GetBasePath(), relpath);
     SDL_Surface * surface = SDL_LoadBMP(path);
     if (surface == nullptr) {
-        SDL_Log("Couldn't load tiles bitmap: %s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Couldn't load tiles bitmap, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     SDL_Texture * index = SDL_CreateTextureFromSurface(renderer, surface);
     if (index == nullptr) {
-        SDL_Log("Couldn't create index: %s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Couldn't create texture for tiles, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     // free dynamically allocated memory used by surface and by path
@@ -91,15 +99,15 @@ void world_delete (struct world ** self) {
     (*self)->tile.index = nullptr;
 
     // free memory holding the contiguous tile type data
-    free((*self)->tile.types[0]);
+    SDL_free((*self)->tile.types[0]);
     (*self)->tile.types[0] = nullptr;
 
     // free memory holding the row/column tile type data
-    free((*self)->tile.types);
+    SDL_free((*self)->tile.types);
     (*self)->tile.types = nullptr;
 
     // free own resources
-    free(*self);
+    SDL_free(*self);
     *self = nullptr;
 }
 
@@ -199,9 +207,11 @@ struct world * world_new (void) {
         // memory has already been allocated for `singleton`
         return singleton;
     }
-    singleton = (struct world *) calloc(1, sizeof(struct world));
+    singleton = (struct world *) SDL_calloc(1, sizeof(struct world));
     if (singleton == nullptr) {
-        SDL_Log("ERROR allocating dynamic memory for struct world, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "ERROR allocating dynamic memory for struct world, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     return singleton;

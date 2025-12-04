@@ -2,11 +2,11 @@
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_filesystem.h"  // SDL_GetBasePath
-#include "SDL3/SDL_log.h"         // SDL_Log
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_CreateTextureFromSurface, SDL_DestroyTexture, SDL_RenderTexture
-//#include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_free
-//#include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
-#include <stdlib.h>               // calloc, free, exit
+#include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_free, SDL_calloc
+#include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
+#include <stdlib.h>               // exit
 
 // declare properties of `struct wheel`
 struct wheel {
@@ -29,12 +29,16 @@ static SDL_Texture * load_wheel_texture (const char * relpath, SDL_Renderer * re
     SDL_asprintf(&path, "%s%s", SDL_GetBasePath(), relpath);
     SDL_Surface * surface = SDL_LoadBMP(path);
     if (surface == nullptr) {
-        SDL_Log("Couldn't load wheel bitmap: %s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Couldn't load surface for wheel, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (texture == nullptr) {
-        SDL_Log("Couldn't create texture: %s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Couldn't create texture for wheel, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     // free dynamically allocated memory used by surface and by path
@@ -46,7 +50,10 @@ static SDL_Texture * load_wheel_texture (const char * relpath, SDL_Renderer * re
 }
 
 void wheel_delete (struct wheel ** self) {
-    (void) self;
+    SDL_DestroyTexture((*self)->texture);
+    (*self)->texture = nullptr;
+    SDL_free(*self);
+    *self = nullptr;
 }
 
 void wheel_draw (const struct wheel * self, SDL_Renderer * renderer) {
@@ -84,9 +91,11 @@ struct wheel * wheel_new (void) {
         // memory has already been allocated for `singleton`
         return singleton;
     }
-    singleton = (struct wheel *) calloc(1, sizeof(struct wheel));
+    singleton = (struct wheel *) SDL_calloc(1, sizeof(struct wheel));
     if (singleton == nullptr) {
-        SDL_Log("ERROR allocating dynamic memory for struct wheel, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "ERROR allocating dynamic memory for struct wheel, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     return singleton;

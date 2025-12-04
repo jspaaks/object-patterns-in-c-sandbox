@@ -5,10 +5,11 @@
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_events.h"      // SDL_Event
 #include "SDL3/SDL_init.h"        // SDL_InitFlags, SDL_AppResult, defines
-#include "SDL3/SDL_log.h"         // SDL_Log
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
 #define SDL_MAIN_USE_CALLBACKS 1  // use the callbacks instead of main()
 #include "SDL3/SDL_main.h"        // definition of main() that calls the callback functions
 #include "SDL3/SDL_render.h"      // SDL_Renderer
+#include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
 #include "SDL3/SDL_timer.h"       // SDL_GetTicksNS
 #include "SDL3/SDL_video.h"       // SDL_Window, SDL_WindowFlags, defines
 #include "SDL3/SDL.h"
@@ -22,7 +23,9 @@ static void init_sdl_window_and_renderer (SDL_WindowFlags flags, struct dims * d
 static void init_sdl_subsystems (SDL_InitFlags flags) {
     bool success = SDL_Init(flags);
     if (!success) {
-        SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Couldn't initialize SDL, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
 }
@@ -33,7 +36,9 @@ static void init_sdl_window_and_renderer (SDL_WindowFlags flags, struct dims * d
     bool success = SDL_CreateWindowAndRenderer("scroller", dims->window.w, dims->window.h, flags,
                                                window, renderer);
     if (!success) {
-        SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Couldn't create window/renderer, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     SDL_SetRenderLogicalPresentation(*renderer, dims->view.w, dims->view.h, SDL_LOGICAL_PRESENTATION_LETTERBOX);
@@ -101,7 +106,13 @@ SDL_AppResult SDL_AppInit(void ** appstate_vpp, int argc, char * argv[]) {
     game_init(game, renderer, &dims);
 
     // facilitate sharing state between callbacks via void ** appstate_vpp
-    *appstate_vpp = (void *) calloc(1, sizeof(struct appstate));
+    *appstate_vpp = (void *) SDL_calloc(1, sizeof(struct appstate));
+    if (*appstate_vpp == nullptr) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Could not allocate dynamic memory for appstate, aborting: %s\n",
+                        SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
 
     // make the void pointer appstate_vp usable by casting it as a struct appstate pointer
     struct appstate ** appstate = (struct appstate **) appstate_vpp;
@@ -148,13 +159,17 @@ void SDL_AppQuit(void * appstate_vp, SDL_AppResult result) {
     // make the void pointer appstate_vp usable by casting it as a struct appstate pointer
     struct appstate * appstate = (struct appstate *) appstate_vp;
 
-    game_delete(&appstate->game);
-    timings_delete(&appstate->timings);
-
-    // SDL will clean up appstate->window for us
-    // SDL will clean up appstate->renderer for us
-
-    free(appstate_vp);
+    // clean up appstate and its members
+    if (appstate != nullptr) {
+        game_delete(&appstate->game);
+        timings_delete(&appstate->timings);
+        SDL_DestroyRenderer(appstate->renderer);
+        appstate->renderer = nullptr;
+        SDL_DestroyWindow(appstate->window);
+        appstate->window = nullptr;
+        SDL_free(appstate_vp);
+        appstate_vp = nullptr;
+    }
 
     // exit with result status
     exit(result);

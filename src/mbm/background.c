@@ -1,8 +1,10 @@
 #include "mbm/background.h"       // struct background and associated functions
+#include "SDL3/SDL_error.h"       // SDL_GetError
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_pixels.h"      // SDL_Color
 #include "SDL3/SDL_render.h"      // SDL_Renderer
-#include <stdio.h>                // fprintf
-#include <stdlib.h>               // free
+#include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
+#include <stdlib.h>               // exit
 
 // declare properties of `struct background`
 struct background {
@@ -13,7 +15,7 @@ struct background {
 static struct background * singleton = nullptr;
 
 void background_delete (struct background ** self) {
-    free(*self);
+    SDL_free(*self);
     *self = nullptr;
 }
 
@@ -38,9 +40,11 @@ struct background * background_new (void) {
         // memory has already been allocated for `singleton`
         return singleton;
     }
-    singleton = (struct background *) calloc(1, sizeof(struct background));
+    singleton = (struct background *) SDL_calloc(1, sizeof(struct background));
     if (singleton == nullptr) {
-        fprintf(stderr, "ERROR allocating dynamic memory for struct background, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Could not allocate dynamic memory for struct background, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     return singleton;

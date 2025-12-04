@@ -3,13 +3,15 @@
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "mbm/wheel.h"            // struct wheel and associated functions
 #include "mbm/world.h"            // struct world and associated functions
+#include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_events.h"      // SDL_Event
 #include "SDL3/SDL_init.h"        // SDL_AppResult
 #include "SDL3/SDL_keyboard.h"    // SDL_GetKeyboardState
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_render.h"      // SDL_Renderer
+#include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
 #include "SDL3/SDL_video.h"       // SDL_Window
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>               // exit
 
 typedef enum {
     MBM_GAME_STATE_PLAYING,
@@ -51,7 +53,7 @@ void game_delete (struct game ** self) {
     wheel_delete(&(*self)->wheel);
 
     // release own resources
-    free(*self);
+    SDL_free(*self);
     *self = nullptr;
 }
 
@@ -134,9 +136,11 @@ struct game * game_new (void) {
         // memory has already been allocated for `singleton`
         return singleton;
     }
-    singleton = (struct game *) calloc(1, sizeof(struct game));
+    singleton = (struct game *) SDL_calloc(1, sizeof(struct game));
     if (singleton == nullptr) {
-        fprintf(stderr, "ERROR allocating dynamic memory for struct game, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Could not allocate dynamic memory for struct game, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     return singleton;

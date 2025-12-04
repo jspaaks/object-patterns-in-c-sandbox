@@ -1,8 +1,10 @@
 #include "mbm/timings.h"          // struct timings and associated functions
+#include "SDL3/SDL_error.h"       // SDL_GetError
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
+#include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
 #include "SDL3/SDL_timer.h"       // SDL_GetTicksNS
 #include <stdint.h>               // uint64_t
-#include <stdio.h>                // fprintf
-#include <stdlib.h>               // free
+#include <stdlib.h>               // exit
 
 // declare properties of `struct timings`
 struct timings {
@@ -17,7 +19,7 @@ struct timings {
 static struct timings * singleton = nullptr;
 
 void timings_delete (struct timings ** self) {
-    free(*self);
+    SDL_free(*self);
     *self = nullptr;
 }
 
@@ -40,9 +42,11 @@ struct timings * timings_new (void) {
         // memory has already been allocated for `singleton`
         return singleton;
     }
-    singleton = (struct timings *) calloc(1, sizeof(struct timings));
+    singleton = (struct timings *) SDL_calloc(1, sizeof(struct timings));
     if (singleton == nullptr) {
-        fprintf(stderr, "ERROR allocating dynamic memory for struct timings, aborting.\n");
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "Could not allocate dynamic memory for struct timings, aborting; %s\n",
+                        SDL_GetError());
         exit(1);
     }
     return singleton;
