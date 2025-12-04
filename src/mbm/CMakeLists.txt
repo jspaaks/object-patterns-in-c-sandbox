@@ -41,11 +41,13 @@ target_include_directories(
     PRIVATE
         ../../include
         ../../third_party/SDL/include
+        ../../third_party/libidx/include
 )
 
 target_link_libraries(
     tgt_lib_mbm
     PRIVATE
+        tgt_lib_idx
 )
 
 target_link_options(

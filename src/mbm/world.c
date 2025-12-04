@@ -1,6 +1,7 @@
 #include "mbm/world.h"
 #include "mbm/dims.h"             // struct dims
 #include "mbm/timings.h"          // struct timings and associated functions
+#include "idx/idx.h"              // functionality related to reading binary data from file
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_filesystem.h"  // SDL_GetBasePath
 #include "SDL3/SDL_log.h"         // SDL_LogCritical
@@ -8,11 +9,12 @@
 #include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_CreateTextureFromSurface, SDL_DestroyTexture, SDL_RenderTexture
 #include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_calloc, SDL_free
 #include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
-#include <stdint.h>               // uint64_t
+#include <assert.h>               // assert
+#include <stdint.h>               // uint64_t, uint8_t
 #include <stdlib.h>               // exit
 #include <sys/param.h>            // MIN
 
-typedef enum {
+typedef enum : uint8_t {
     TILE_TYPE_AIR = 0,
     TILE_TYPE_GROUND,
     TILE_TYPE_COUNT,
@@ -43,6 +45,7 @@ struct world {
 // forward declaration of static functions
 static TileType ** allocate_tiles (int nrows, int ncols);
 static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * renderer);
+static void load_tile_map (const char * relpath, uint32_t nrows, uint32_t ncols, uint8_t * bufffer);
 
 // define pointer to singleton instance of `struct world`
 static struct world * singleton = nullptr;
@@ -93,6 +96,25 @@ static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * rende
     return index;
 }
 
+static void load_tile_map (const char * relpath, uint32_t nrows, uint32_t ncols, uint8_t * buffer) {
+    char * path = nullptr;
+    SDL_asprintf(&path, "%s%s", SDL_GetBasePath(), relpath);
+    const IdxHeader header = idx_read_header(path);
+    if (header.lengths[0] != nrows) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "number of rows in tile map should be equal to number of rows in tilemap file, aborting.\n");
+        exit(1);
+    }
+    if (header.lengths[1] != ncols) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                        "number of columns in tile map should be equal to number of columns in tilemap file, aborting.\n");
+        exit(1);
+    }
+    idx_read_body_as_uint8(path, &header, buffer);
+    SDL_free(path);
+    path = nullptr;
+}
+
 void world_delete (struct world ** self) {
     // free dynamically allocated memory used by .index
     SDL_DestroyTexture((*self)->tile.index);
@@ -139,18 +161,8 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     // allocate memory for accessing the tiles consecutively and by row/col; 
     TileType ** tile_types = allocate_tiles(nrows, ncols);
 
-    // initialize a tile pattern
-    {
-        for (int irow = 0; irow < nrows; irow++) {
-            for (int icol = 0; icol < ncols; icol++) {
-                if (irow == icol % nrows) {
-                    tile_types[irow][icol] = TILE_TYPE_GROUND;
-                } else {
-                    tile_types[irow][icol] = TILE_TYPE_AIR;
-                }
-            }
-        }
-    }
+    // initialize a tile pattern by loading from file
+    load_tile_map("../share/mbm/assets/tilemaps/level1.idx", nrows, ncols, tile_types[0]);
 
     *self = (struct world) {
         .h = dims->world.h,

@@ -33,6 +33,9 @@ else()
     find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
 endif()
 
+add_subdirectory(third_party/libidx EXCLUDE_FROM_ALL)
+install(TARGETS tgt_lib_idx)
+
 add_subdirectory(assets)
 add_subdirectory(src/app)
 add_subdirectory(src/mbm)
