@@ -64,16 +64,16 @@ SDL_AppResult SDL_AppInit(void ** appstate_vpp, int argc, char * argv[]) {
             .w = 32,
         },
         .view = {
-            .h = 386,
-            .w = 640,
+            .h = 7 * 32,
+            .w = 20 * 32,
         },
         .window = {
             .h = 360,
             .w = 800,
         },
         .world = {
-            .h = 386,
-            .w = 1536,
+            .h = 7 * 32,
+            .w = 40 * 32,
         }
     };
 
