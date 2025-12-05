@@ -50,4 +50,7 @@ struct background * background_new (void) {
     return singleton;
 }
 
-void background_update (const struct background *) {}
+void background_update (struct background * self, const struct timings * timings) {
+    (void) self;
+    (void) timings;
+}
