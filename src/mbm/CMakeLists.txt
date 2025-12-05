@@ -60,9 +60,9 @@ target_sources(
     tgt_lib_mbm
     PRIVATE
         background.c
+        duck.c
         game.c
         timings.c
-        wheel.c
         world.c
     PUBLIC
         FILE_SET fset_lib_mbm_headers
@@ -72,9 +72,9 @@ target_sources(
                 ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
             FILES
                 ../../include/mbm/background.h
+                ../../include/mbm/duck.h
                 ../../include/mbm/game.h
                 ../../include/mbm/timings.h
-                ../../include/mbm/wheel.h
                 ../../include/mbm/world.h
                 ${CMAKE_BINARY_DIR}/include/mbm/abi.h  # cmake-generated file
 )

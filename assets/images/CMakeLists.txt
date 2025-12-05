@@ -1,6 +1,6 @@
 install(
     FILES
+        duck.bmp
         tiles.bmp
-        wheel.bmp
     DESTINATION ${CMAKE_INSTALL_DATADIR}/mbm/assets/images
 )

@@ -1,7 +1,7 @@
 #include "mbm/background.h"       // struct background and associated functions
+#include "mbm/duck.h"             // struct duck and associated functions
 #include "mbm/game.h"             // struct game and associated functions
 #include "mbm/timings.h"          // struct timings and associated functions
-#include "mbm/wheel.h"            // struct wheel and associated functions
 #include "mbm/world.h"            // struct world and associated functions
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_events.h"      // SDL_Event
@@ -27,9 +27,9 @@ typedef void (*UpdateFunction)(struct game * game, const struct timings * timing
 struct game {
     struct background * background;
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
+    struct duck * duck;
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     State state;
-    struct wheel * wheel;
     struct world * world;
     UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
@@ -48,9 +48,9 @@ static void game_update_playing (struct game * self, const struct timings * timi
 void game_delete (struct game ** self) {
 
     // delegate freeing dynamically allocated memory to the respective objects
+    duck_delete(&(*self)->duck);
     background_delete(&(*self)->background);
     world_delete(&(*self)->world);
-    wheel_delete(&(*self)->wheel);
 
     // release own resources
     SDL_free(*self);
@@ -69,7 +69,7 @@ static void game_draw_paused (const struct game * self, SDL_Renderer * renderer)
 static void game_draw_playing (const struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
     world_draw(self->world, renderer);
-    wheel_draw(self->wheel, renderer);
+    duck_draw(self->duck, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, const SDL_Event * event) {
@@ -126,9 +126,9 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     self->world = world_new();
     world_init(self->world, renderer, dims);
 
-    // initialize the wheel
-    self->wheel = wheel_new();
-    wheel_init(self->wheel, renderer, dims);
+    // initialize the duck
+    self->duck = duck_new();
+    duck_init(self->duck, renderer, dims);
 }
 
 struct game * game_new (void) {
@@ -163,7 +163,7 @@ static void game_update_playing (struct game * self, const struct timings * timi
     if (key_states[SDL_SCANCODE_RIGHT]) {
         world_move_view_right(self->world, timings);
     }
-    background_update(self->background);
-    world_update(self->world);
-    wheel_update(self->wheel, timings);
+    background_update(self->background, timings);
+    world_update(self->world, timings);
+    duck_update(self->duck, timings);
 }
