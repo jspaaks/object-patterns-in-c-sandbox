@@ -17,6 +17,7 @@
 typedef enum : uint8_t {
     TILE_TYPE_AIR = 0,
     TILE_TYPE_GROUND,
+    TILE_TYPE_BRICK_WALL,
     TILE_TYPE_COUNT,
 } TileType;
 
@@ -173,15 +174,21 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
             .index = index,
             .srcs = {
                 [TILE_TYPE_AIR] = (SDL_FRect) {
-                    .h = (float) (dims->tile.h - 2),
-                    .w = (float) (dims->tile.w - 2),
-                    .x = 1.0f,
+                    .h = (float) (dims->tile.h),
+                    .w = (float) (dims->tile.w),
+                    .x = 0 * (32.0f + 2.0f) + 1.0f,
                     .y = 1.0f,
                 },
                 [TILE_TYPE_GROUND] = (SDL_FRect) {
-                    .h = (float) (dims->tile.h - 2),
-                    .w = (float) (dims->tile.w - 2),
-                    .x = 32.0f + 10.0f + 1.0f,
+                    .h = (float) (dims->tile.h),
+                    .w = (float) (dims->tile.w),
+                    .x = 1 * (32.0f + 2.0f) + 1.0f,
+                    .y = 1.0f,
+                },
+                [TILE_TYPE_BRICK_WALL] = (SDL_FRect) {
+                    .h = (float) (dims->tile.h),
+                    .w = (float) (dims->tile.w),
+                    .x = 2 * (32.0f + 2.0f) + 1.0f,
                     .y = 1.0f,
                 },
             },
@@ -229,4 +236,7 @@ struct world * world_new (void) {
     return singleton;
 }
 
-void world_update (struct world *) {}
+void world_update (struct world * self, const struct timings * timings) {
+    (void) self;
+    (void) timings;
+}
