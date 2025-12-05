@@ -14,6 +14,6 @@ MBM_ABI void world_init (struct world * self, SDL_Renderer * renderer, const str
 MBM_ABI void world_move_view_left (struct world * self, const struct timings * timings);
 MBM_ABI void world_move_view_right (struct world * self, const struct timings * timings);
 MBM_ABI struct world * world_new (void);
-MBM_ABI void world_update (struct world * self);
+MBM_ABI void world_update (struct world * self, const struct timings * timings);
 
 #endif
