@@ -28,7 +28,7 @@ struct world {
     int nrows;
     struct {
         int h;
-        SDL_Texture * index;
+        SDL_Texture * texture;
         SDL_FRect srcs[TILE_TYPE_COUNT];
         TileType ** types;
         int w;
@@ -82,19 +82,23 @@ static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * rende
                         SDL_GetError());
         exit(1);
     }
-    SDL_Texture * index = SDL_CreateTextureFromSurface(renderer, surface);
-    if (index == nullptr) {
+    SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
+    if (texture == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
                         "Couldn't create texture for tiles, aborting; %s\n",
                         SDL_GetError());
         exit(1);
     }
+
+    // set texture scale mode
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+
     // free dynamically allocated memory used by surface and by path
     SDL_DestroySurface(surface);
     surface = nullptr;
     SDL_free(path);
     path = nullptr;
-    return index;
+    return texture;
 }
 
 static void load_tile_map (const char * relpath, uint32_t nrows, uint32_t ncols, uint8_t * buffer) {
@@ -117,9 +121,9 @@ static void load_tile_map (const char * relpath, uint32_t nrows, uint32_t ncols,
 }
 
 void world_delete (struct world ** self) {
-    // free dynamically allocated memory used by .index
-    SDL_DestroyTexture((*self)->tile.index);
-    (*self)->tile.index = nullptr;
+    // free dynamically allocated memory used by .texture
+    SDL_DestroyTexture((*self)->tile.texture);
+    (*self)->tile.texture = nullptr;
 
     // free memory holding the contiguous tile type data
     SDL_free((*self)->tile.types[0]);
@@ -147,7 +151,7 @@ void world_draw (const struct world * self, SDL_Renderer * renderer) {
                 .x = (float) (icol * self->tile.w) - self->view.x,
                 .y = (float) (irow * self->tile.h),
             };
-            SDL_RenderTexture(renderer, self->tile.index, &src, &wld);
+            SDL_RenderTexture(renderer, self->tile.texture, &src, &wld);
         }
     }
 }
@@ -157,7 +161,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     int ncols = dims->world.w / dims->tile.w;
 
     // load the tile index into a texture 
-    SDL_Texture * index = load_tile_index("../share/mbm/assets/images/tiles.bmp", renderer);
+    SDL_Texture * texture = load_tile_index("../share/mbm/assets/images/tiles.bmp", renderer);
 
     // allocate memory for accessing the tiles consecutively and by row/col; 
     TileType ** tile_types = allocate_tiles(nrows, ncols);
@@ -171,7 +175,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
         .nrows = nrows,
         .tile = {
             .h = dims->tile.h,
-            .index = index,
+            .texture = texture,
             .srcs = {
                 [TILE_TYPE_AIR] = (SDL_FRect) {
                     .h = (float) (dims->tile.h),
