@@ -27,6 +27,10 @@ float timings_get_frame_duration (const struct timings * self) {
     return self->frame.duration;
 }
 
+uint64_t timings_get_frame_timestamp (const struct timings * self) {
+    return self->frame.tthis;
+}
+
 void timings_init (struct timings * self) {
     *self = (struct timings) {
         .frame = {
