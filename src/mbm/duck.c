@@ -23,9 +23,9 @@ struct frame {
 
 // declare properties of `struct animation`
 struct animation {
-    int nframes;
-    struct frame frames[10];
     uint64_t duration;
+    struct frame frames[10];
+    int nframes;
 };
 
 // declare properties of `struct duck`
@@ -33,6 +33,8 @@ struct duck {
     struct animation animations[ANIMATION_STATE_COUNT];
     enum animation_state ianim;
     int iframe;
+    uint64_t t_frame_expires;
+    uint64_t t_anim_started;
     SDL_Texture * texture;
     SDL_FRect wld;
 };
@@ -108,10 +110,10 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 0 * w,
                             .y = ANIMATION_STATE_IDLE * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                 },
-                .duration = (uint64_t) 100,
+                .duration = (uint64_t) 1e5,
                 .nframes = 1,
             },
             [ANIMATION_STATE_WALKING] = (struct animation) {
@@ -123,7 +125,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 0 * w,
                             .y = ANIMATION_STATE_WALKING * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                     [1] = (struct frame) {
                         .src = (SDL_FRect) {
@@ -132,7 +134,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 1 * w,
                             .y = ANIMATION_STATE_WALKING * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                     [2] = (struct frame) {
                         .src = (SDL_FRect) {
@@ -141,7 +143,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 2 * w,
                             .y = ANIMATION_STATE_WALKING * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                     [3] = (struct frame) {
                         .src = (SDL_FRect) {
@@ -150,7 +152,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 3 * w,
                             .y = ANIMATION_STATE_WALKING * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                     [4] = (struct frame) {
                         .src = (SDL_FRect) {
@@ -159,7 +161,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 4 * w,
                             .y = ANIMATION_STATE_WALKING * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                     [5] = (struct frame) {
                         .src = (SDL_FRect) {
@@ -168,15 +170,17 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
                             .x = 5 * w,
                             .y = ANIMATION_STATE_WALKING * h,
                         },
-                        .duration = (uint64_t) 100,
+                        .duration = (uint64_t) 1e5,
                     },
                 },
-                .duration = (uint64_t) 600,
+                .duration = (uint64_t) 6e5,
                 .nframes = 6,
             },
         },
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
+        .t_anim_started = (uint64_t) 0,
+        .t_frame_expires = (uint64_t) 0,
         .texture = load_duck_texture("../share/mbm/assets/images/duck.bmp", renderer),
         .wld = (SDL_FRect) {
             .h = 32.0f,
@@ -202,7 +206,32 @@ struct duck * duck_new (void) {
     return singleton;
 }
 
+void duck_set_animation_state_idle (struct duck * self, const struct timings * timings) {
+    self->ianim = ANIMATION_STATE_IDLE;
+    self->iframe = 0;
+    self->t_anim_started = timings_get_frame_timestamp(timings);
+    self->t_frame_expires = self->animations[self->ianim].frames[self->iframe].duration;
+
+}
+
+void duck_set_animation_state_walking (struct duck * self, const struct timings * timings) {
+    self->ianim = ANIMATION_STATE_WALKING;
+    self->iframe = 0;
+    self->t_anim_started = timings_get_frame_timestamp(timings);
+    self->t_frame_expires = self->animations[self->ianim].frames[self->iframe].duration;
+}
+
 void duck_update (struct duck * self, const struct timings * timings) {
-    (void) self;
-    (void) timings;
+    uint64_t tnow = timings_get_frame_timestamp(timings);
+    if (tnow > self->t_frame_expires) {
+        struct animation * animation = &self->animations[self->ianim];
+        self->iframe = 0;
+        uint64_t tmod = (tnow - self->t_anim_started) % animation->duration;
+        uint64_t tacc = animation->frames[self->iframe].duration;
+        while (tacc < tmod && self->iframe < animation->nframes - 1) {
+            self->iframe++;
+            tacc += animation->frames[self->iframe].duration;
+        }
+        self->t_frame_expires = tacc;
+    }
 }
