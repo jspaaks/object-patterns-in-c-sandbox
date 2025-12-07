@@ -45,7 +45,7 @@ struct world {
 
 // forward declaration of static functions
 static TileType ** allocate_tiles (int nrows, int ncols);
-static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * renderer);
+static SDL_Texture * load_tile_texture (const char * relpath, SDL_Renderer * renderer);
 static void load_tile_map (const char * relpath, uint32_t nrows, uint32_t ncols, uint8_t * bufffer);
 
 // define pointer to singleton instance of `struct world`
@@ -72,7 +72,9 @@ static TileType ** allocate_tiles (const int nrows, const int ncols) {
     return tile_types;
 }
 
-static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * renderer) {
+static SDL_Texture * load_tile_texture (const char * relpath, SDL_Renderer * renderer) {
+
+    // create surface given relative path
     char * path = nullptr;
     SDL_asprintf(&path, "%s%s", SDL_GetBasePath(), relpath);
     SDL_Surface * surface = SDL_LoadBMP(path);
@@ -82,6 +84,8 @@ static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * rende
                         SDL_GetError());
         exit(1);
     }
+
+    // create texture from surface
     SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (texture == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
@@ -98,6 +102,8 @@ static SDL_Texture * load_tile_index (const char * relpath, SDL_Renderer * rende
     surface = nullptr;
     SDL_free(path);
     path = nullptr;
+
+    // return texture
     return texture;
 }
 
@@ -161,7 +167,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     int ncols = dims->world.w / dims->tile.w;
 
     // load the tile index into a texture 
-    SDL_Texture * texture = load_tile_index("../share/mbm/assets/images/tiles.bmp", renderer);
+    SDL_Texture * texture = load_tile_texture("../share/mbm/assets/images/tiles.bmp", renderer);
 
     // allocate memory for accessing the tiles consecutively and by row/col; 
     TileType ** tile_types = allocate_tiles(nrows, ncols);
