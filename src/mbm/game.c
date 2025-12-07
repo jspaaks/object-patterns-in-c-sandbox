@@ -163,6 +163,12 @@ static void game_update_playing (struct game * self, const struct timings * timi
     if (key_states[SDL_SCANCODE_RIGHT]) {
         world_move_view_right(self->world, timings);
     }
+    if (key_states[SDL_SCANCODE_I]) {
+        duck_set_animation_state_idle(self->duck, timings);
+    }
+    if (key_states[SDL_SCANCODE_W]) {
+        duck_set_animation_state_walking(self->duck, timings);
+    }
     background_update(self->background, timings);
     world_update(self->world, timings);
     duck_update(self->duck, timings);
