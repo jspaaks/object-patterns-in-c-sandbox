@@ -90,7 +90,7 @@ _This project was initialized using [Copier](https://pypi.org/project/copier) an
 
 <!--
 
-TODO
+Project limits for the time being
 
 1. animated sprites
 1. collision detection
