@@ -95,4 +95,8 @@ Project limits for the time being
 1. animated sprites
 1. collision detection
 
+TODO
+
+- Review duck_update
+
 -->

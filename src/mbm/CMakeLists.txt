@@ -59,6 +59,7 @@ target_link_options(
 target_sources(
     tgt_lib_mbm
     PRIVATE
+        animations.c
         background.c
         duck.c
         game.c
