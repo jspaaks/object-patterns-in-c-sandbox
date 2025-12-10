@@ -98,5 +98,6 @@ Project limits for the time being
 TODO
 
 - Review duck_update
+- Migrate uint64_t to int64_t to avoid problems when doing math
 
 -->
