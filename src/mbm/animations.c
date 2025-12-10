@@ -12,7 +12,7 @@
 // declare properties of `struct animations`
 struct animations {
     uint64_t * durations;
-    uint64_t ** frame_durations;
+    uint64_t ** frame_durations_acc;
     SDL_FRect ** frame_srcs;
     int nframes_cap;
     int nanims;
@@ -38,11 +38,11 @@ void animations_delete (struct animations ** self) {
     SDL_free((*self)->frame_srcs);
     (*self)->frame_srcs = nullptr;
 
-    SDL_free((*self)->frame_durations[0]);
-    (*self)->frame_durations[0] = nullptr;
+    SDL_free((*self)->frame_durations_acc[0]);
+    (*self)->frame_durations_acc[0] = nullptr;
 
-    SDL_free((*self)->frame_durations);
-    (*self)->frame_durations = nullptr;
+    SDL_free((*self)->frame_durations_acc);
+    (*self)->frame_durations_acc = nullptr;
 
     SDL_free((*self)->durations);
     (*self)->durations = nullptr;
@@ -53,59 +53,80 @@ void animations_delete (struct animations ** self) {
 
 struct animations * animations_new (int nanims_cap, int nframes_cap, const char * relpath, SDL_Renderer * renderer) {
 
-    struct animations * animations = SDL_calloc(1, sizeof(struct animations));
-    if (animations == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "Couldn't create dynamic memory for storing struct animations, aborting; %s\n",
-                        SDL_GetError());
-        exit(1);
+    struct animations * animations = nullptr;
+    uint64_t * durations = nullptr;
+    SDL_FRect ** frame_srcs = nullptr;
+    uint64_t ** frame_durations_acc = nullptr;
+    int * nframes = nullptr;
+
+    // allocate dynamic memory for holding the struct animations (`self`)
+    {
+        animations = SDL_calloc(1, sizeof(struct animations));
+        if (animations == nullptr) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                            "Couldn't create dynamic memory for storing struct animations, aborting; %s\n",
+                            SDL_GetError());
+            exit(1);
+        }
     }
 
-    uint64_t * durations = SDL_calloc(nanims_cap, sizeof(uint64_t));
-    if (durations == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "Couldn't create dynamic memory for storing animation durations, aborting; %s\n",
-                        SDL_GetError());
-        exit(1);
+    // allocate dynamic memory for holding the 1d array with the animation durations (`.durations`)
+    {
+        durations = SDL_calloc(nanims_cap, sizeof(uint64_t));
+        if (durations == nullptr) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                            "Couldn't create dynamic memory for storing animation durations, aborting; %s\n",
+                            SDL_GetError());
+            exit(1);
+        }
     }
 
-    SDL_FRect * frame_srcs_contig = SDL_calloc(nanims_cap * nframes_cap, sizeof(SDL_FRect));
-    if (frame_srcs_contig == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "Couldn't create contiguous dynamic memory for storing frame rects, aborting; %s\n",
-                        SDL_GetError());
-        exit(1);
-    }
-    SDL_FRect ** frame_srcs = SDL_calloc(nanims_cap, sizeof(SDL_FRect *));
-    if (frame_srcs == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "Couldn't create dynamic memory for storing pointers to frame rects, aborting; %s\n",
-                        SDL_GetError());
-        exit(1);
-    }
-    for (int i = 0; i < nanims_cap; ++i) {
-        frame_srcs[i] = &frame_srcs_contig[i * nframes_cap];
-    }
-
-    uint64_t * frame_durations_contig = SDL_calloc(nanims_cap * nframes_cap, sizeof(uint64_t));
-    if (frame_durations_contig == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "Couldn't create contiguous dynamic memory for storing frame durations, aborting; %s\n",
-                        SDL_GetError());
-        exit(1);
-    }
-    uint64_t ** frame_durations = SDL_calloc(nanims_cap, sizeof(uint64_t *));
-    if (frame_durations == nullptr) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "Couldn't create dynamic memory for storing pointers to frame durations, aborting; %s\n",
-                        SDL_GetError());
-        exit(1);
-    }
-    for (int i = 0; i < nanims_cap; ++i) {
-        frame_durations[i] = &frame_durations_contig[i * nframes_cap];
+    // allocate dynamic memory for holding the 2d array with the frame rectangles (`.frame_srcs`)
+    {
+        SDL_FRect * frame_srcs_contig = SDL_calloc(nanims_cap * nframes_cap, sizeof(SDL_FRect));
+        if (frame_srcs_contig == nullptr) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                            "Couldn't create contiguous dynamic memory for storing frame rects, aborting; %s\n",
+                            SDL_GetError());
+            exit(1);
+        }
+        frame_srcs = SDL_calloc(nanims_cap, sizeof(SDL_FRect *));
+        if (frame_srcs == nullptr) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                            "Couldn't create dynamic memory for storing pointers to frame rects, aborting; %s\n",
+                            SDL_GetError());
+            exit(1);
+        }
+        for (int i = 0; i < nanims_cap; ++i) {
+            frame_srcs[i] = &frame_srcs_contig[i * nframes_cap];
+        }
+        // don't free `frame_srcs_contig` yet, since it's used via `.frame_srcs[0]`
     }
 
-    int * nframes = SDL_calloc(nanims_cap, sizeof(int));
+    // allocate dynamic memory for holding the 2d array with the accumulated frame durations (`.frame_durations_acc`)
+    {
+        uint64_t * frame_durations_acc_contig = SDL_calloc(nanims_cap * nframes_cap, sizeof(uint64_t));
+        if (frame_durations_acc_contig == nullptr) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                            "Couldn't create contiguous dynamic memory for storing accumated frame durations, aborting; %s\n",
+                            SDL_GetError());
+            exit(1);
+        }
+        frame_durations_acc = SDL_calloc(nanims_cap, sizeof(uint64_t *));
+        if (frame_durations_acc == nullptr) {
+            SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
+                            "Couldn't create dynamic memory for storing pointers to accumulated frame durations, aborting; %s\n",
+                            SDL_GetError());
+            exit(1);
+        }
+        for (int i = 0; i < nanims_cap; ++i) {
+            frame_durations_acc[i] = &frame_durations_acc_contig[i * nframes_cap];
+        }
+        // don't free `frame_durations_acc_contig` yet, since it's used via `.frame_durations_acc[0]`
+    }
+
+    // allocate dynamic memory for holding the 1d array with the number of frames (`.nframes`)
+    nframes = SDL_calloc(nanims_cap, sizeof(int));
     if (nframes == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
                         "Couldn't create dynamic memory for storing nframes, aborting; %s\n",
@@ -113,9 +134,10 @@ struct animations * animations_new (int nanims_cap, int nframes_cap, const char 
         exit(1);
     }
 
+    // assemble the struct animations / self
     *animations = (struct animations) {
         .durations = durations,
-        .frame_durations = frame_durations,
+        .frame_durations_acc = frame_durations_acc,
         .frame_srcs = frame_srcs,
         .nanims = 0,
         .nanims_cap = nanims_cap,
@@ -154,29 +176,36 @@ void animations_append_frame (struct animations * self, uint64_t duration, SDL_F
 
     // add the frame, update durations
     self->frame_srcs[ianim][iframe] = src;
-    self->frame_durations[ianim][iframe] = duration;
+    if (iframe == 0) {
+        self->frame_durations_acc[ianim][iframe] = duration;
+    } else {
+        self->frame_durations_acc[ianim][iframe] = self->frame_durations_acc[ianim][iframe-1] + duration;
+    }
     self->durations[ianim] += duration;
     self->nframes[ianim]++;
 }
 
-uint64_t animations_get_animation_duration (const struct animations * self, int ianim) {
+uint64_t animations_get_animation_duration (struct animations * self, int ianim) {
     return self->durations[ianim];
 }
 
-int animations_get_animation_nframes (const struct animations * self, int ianim) {
-    return self->nframes[ianim];
-}
-
-uint64_t animations_get_frame_duration (const struct animations * self, int ianim, int iframe) {
-    return self->frame_durations[ianim][iframe];
-}
-
-SDL_FRect animations_get_frame_src (const struct animations * self, int ianim, int iframe) {
+SDL_FRect animations_get_frame (const struct animations * self, int ianim, int iframe) {
     return self->frame_srcs[ianim][iframe];
 }
 
 SDL_Texture * animations_get_texture (const struct animations * self) {
     return self->texture;
+}
+
+void animations_update (const struct animations * self, int ianim, uint64_t anim_phase_shift, uint64_t tnow, uint64_t * t_frame_expires, int * iframe) {
+    // TODO review this part
+    *iframe = 0;
+    const uint64_t tref = tnow - anim_phase_shift;
+    const uint64_t tmod = tref % self->durations[ianim];
+    while (self->frame_durations_acc[ianim][*iframe] < tmod && *iframe < self->nframes[ianim] - 1) {
+        (*iframe)++;
+    }
+    *t_frame_expires = tmod + self->frame_durations_acc[ianim][*iframe];
 }
 
 static SDL_Texture * load_texture (const char * relpath, SDL_Renderer * renderer) {

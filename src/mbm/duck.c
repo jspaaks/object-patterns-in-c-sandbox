@@ -21,7 +21,7 @@ struct duck {
     enum animation_state ianim;
     int iframe;
     uint64_t t_frame_expires;
-    uint64_t t_anim_started;
+    uint64_t anim_phase_shift;
     SDL_FRect wld;
 };
 
@@ -36,7 +36,7 @@ void duck_delete (struct duck ** self) {
 }
 
 void duck_draw (const struct duck * self, SDL_Renderer * renderer) {
-    SDL_FRect src = animations_get_frame_src(self->animations, self->ianim, self->iframe);
+    SDL_FRect src = animations_get_frame(self->animations, self->ianim, self->iframe);
     SDL_Texture * texture = animations_get_texture(self->animations);
     SDL_RenderTexture(renderer, texture, &src, &self->wld);
 }
@@ -64,7 +64,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .animations = animations,
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
-        .t_anim_started = (uint64_t) 0,
+        .anim_phase_shift = (uint64_t) 0,
         .t_frame_expires = (uint64_t) 0,
         .wld = (SDL_FRect) {
             .h = 32.0f,
@@ -92,36 +92,25 @@ struct duck * duck_new (void) {
 
 void duck_set_animation_state_idle (struct duck * self, const struct timings * timings) {
     if (self->ianim == ANIMATION_STATE_IDLE) return;
+    uint64_t tnow = timings_get_frame_timestamp(timings);
     self->ianim = ANIMATION_STATE_IDLE;
     self->iframe = 0;
-    self->t_anim_started = timings_get_frame_timestamp(timings);
-    self->t_frame_expires = animations_get_frame_duration(self->animations, self->ianim, self->iframe);
+    self->anim_phase_shift = tnow % animations_get_animation_duration(self->animations, ANIMATION_STATE_IDLE);
+    self->t_frame_expires = 0;
 }
 
 void duck_set_animation_state_walking (struct duck * self, const struct timings * timings) {
     if (self->ianim == ANIMATION_STATE_WALKING) return;
+    uint64_t tnow = timings_get_frame_timestamp(timings);
     self->ianim = ANIMATION_STATE_WALKING;
     self->iframe = 0;
-    self->t_anim_started = timings_get_frame_timestamp(timings);
-    self->t_frame_expires = animations_get_frame_duration(self->animations, self->ianim, self->iframe);
+    self->anim_phase_shift = tnow % animations_get_animation_duration(self->animations, ANIMATION_STATE_WALKING);
+    self->t_frame_expires = 0;
 }
 
 void duck_update (struct duck * self, const struct timings * timings) {
     uint64_t tnow = timings_get_frame_timestamp(timings);
     if (tnow > self->t_frame_expires) {
-
-        self->iframe = 0;
-
-        uint64_t anim_duration = animations_get_animation_duration(self->animations, self->ianim);
-        int anim_nframes = animations_get_animation_nframes(self->animations, self->ianim);
-
-        uint64_t tacc = animations_get_frame_duration(self->animations, self->ianim, self->iframe);
-        uint64_t tmod = (tnow - self->t_anim_started) % anim_duration;
-
-        while (tacc < tmod && self->iframe < anim_nframes - 1) {
-            self->iframe++;
-            tacc += animations_get_frame_duration(self->animations, self->ianim, self->iframe);
-        }
-        self->t_frame_expires = tacc;
+        animations_update(self->animations, self->ianim, self->anim_phase_shift, tnow, &self->t_frame_expires, &self->iframe);
     }
 }
