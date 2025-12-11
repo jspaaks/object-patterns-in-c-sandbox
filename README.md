@@ -87,17 +87,11 @@ $ cmake -DMBM_WITH_ASAN=ON ..
 
 _This project was initialized using [Copier](https://pypi.org/project/copier) and the [copier-template-for-c-projects](https://github.com/jspaaks/copier-template-for-c-projects)._
 
-
 <!--
 
 Project limits for the time being
 
 1. animated sprites
 1. collision detection
-
-TODO
-
-- Review duck_update
-- Migrate uint64_t to int64_t to avoid problems when doing math
 
 -->
