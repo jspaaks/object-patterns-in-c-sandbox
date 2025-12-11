@@ -20,8 +20,8 @@ struct duck {
     struct animations * animations;
     enum animation_state ianim;
     int iframe;
-    uint64_t t_frame_expires;
-    uint64_t anim_phase_shift;
+    int64_t t_frame_expires;
+    int64_t anim_phase_shift;
     SDL_FRect wld;
 };
 
@@ -51,21 +51,21 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
 
     struct animations * animations = animations_new(nanims_cap, nframes_cap, relpath, renderer);
     animations_append_anim(animations);
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 0 * w, .y = ANIMATION_STATE_IDLE * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 0 * w, .y = ANIMATION_STATE_IDLE * h });
     animations_append_anim(animations);
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 0 * w, .y = ANIMATION_STATE_WALKING * h });
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 1 * w, .y = ANIMATION_STATE_WALKING * h });
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 2 * w, .y = ANIMATION_STATE_WALKING * h });
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 3 * w, .y = ANIMATION_STATE_WALKING * h });
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 4 * w, .y = ANIMATION_STATE_WALKING * h });
-    animations_append_frame(animations, (uint64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 5 * w, .y = ANIMATION_STATE_WALKING * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 0 * w, .y = ANIMATION_STATE_WALKING * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 1 * w, .y = ANIMATION_STATE_WALKING * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 2 * w, .y = ANIMATION_STATE_WALKING * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 3 * w, .y = ANIMATION_STATE_WALKING * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 4 * w, .y = ANIMATION_STATE_WALKING * h });
+    animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 5 * w, .y = ANIMATION_STATE_WALKING * h });
 
     *self = (struct duck) {
         .animations = animations,
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
-        .anim_phase_shift = (uint64_t) 0,
-        .t_frame_expires = (uint64_t) 0,
+        .anim_phase_shift = (int64_t) 0,
+        .t_frame_expires = INT64_MIN,
         .wld = (SDL_FRect) {
             .h = 32.0f,
             .w = 32.0f,
@@ -90,26 +90,24 @@ struct duck * duck_new (void) {
     return singleton;
 }
 
-void duck_set_animation_state_idle (struct duck * self, const struct timings * timings) {
+void duck_set_animation_state_idle (struct duck * self) {
     if (self->ianim == ANIMATION_STATE_IDLE) return;
-    uint64_t tnow = timings_get_frame_timestamp(timings);
     self->ianim = ANIMATION_STATE_IDLE;
-    self->iframe = 0;
-    self->anim_phase_shift = tnow % animations_get_animation_duration(self->animations, ANIMATION_STATE_IDLE);
-    self->t_frame_expires = 0;
+    self->t_frame_expires = INT64_MIN;   // triggers animations_update() in duck_update()
 }
 
-void duck_set_animation_state_walking (struct duck * self, const struct timings * timings) {
+void duck_set_animation_state_walking (struct duck * self) {
     if (self->ianim == ANIMATION_STATE_WALKING) return;
-    uint64_t tnow = timings_get_frame_timestamp(timings);
     self->ianim = ANIMATION_STATE_WALKING;
-    self->iframe = 0;
-    self->anim_phase_shift = tnow % animations_get_animation_duration(self->animations, ANIMATION_STATE_WALKING);
-    self->t_frame_expires = 0;
+    self->t_frame_expires = INT64_MIN;   // triggers animations_update() in duck_update()
 }
 
 void duck_update (struct duck * self, const struct timings * timings) {
-    uint64_t tnow = timings_get_frame_timestamp(timings);
+    int64_t tnow = timings_get_frame_timestamp(timings);
+    if (self->t_frame_expires == INT64_MIN) {
+        // determine the animation phase shift the first time after starting animation
+        self->anim_phase_shift = tnow % animations_get_animation_duration(self->animations, ANIMATION_STATE_IDLE);
+    }
     if (tnow > self->t_frame_expires) {
         animations_update(self->animations, self->ianim, self->anim_phase_shift, tnow, &self->t_frame_expires, &self->iframe);
     }

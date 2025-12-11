@@ -3,14 +3,14 @@
 #include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
 #include "SDL3/SDL_timer.h"       // SDL_GetTicksNS
-#include <stdint.h>               // uint64_t
+#include <stdint.h>               // int64_t
 #include <stdlib.h>               // exit
 
 // declare properties of `struct timings`
 struct timings {
     struct {
-        uint64_t tprev;                        // microseconds
-        uint64_t tthis;                        // microseconds
+        int64_t tprev;                        // microseconds
+        int64_t tthis;                        // microseconds
         float duration;                        // seconds
     } frame;
 };
@@ -27,7 +27,7 @@ float timings_get_frame_duration (const struct timings * self) {
     return self->frame.duration;
 }
 
-uint64_t timings_get_frame_timestamp (const struct timings * self) {
+int64_t timings_get_frame_timestamp (const struct timings * self) {
     return self->frame.tthis;
 }
 
@@ -35,8 +35,8 @@ void timings_init (struct timings * self) {
     *self = (struct timings) {
         .frame = {
             .duration = 0,                     // seconds
-            .tprev = SDL_GetTicksNS() / 1000,  // microseconds
-            .tthis = SDL_GetTicksNS() / 1000,  // microseconds
+            .tprev = (int64_t) (SDL_GetTicksNS() / 1000),  // microseconds
+            .tthis = (int64_t) (SDL_GetTicksNS() / 1000),  // microseconds
         },
     };
 }
@@ -58,6 +58,6 @@ struct timings * timings_new (void) {
 
 void timings_update (struct timings * self) {
     self->frame.tprev = self->frame.tthis;
-    self->frame.tthis = SDL_GetTicksNS() / 1000; // microseconds
+    self->frame.tthis = (int64_t) (SDL_GetTicksNS() / 1000); // microseconds
     self->frame.duration = (float) (self->frame.tthis - self->frame.tprev) / 1e6;
 }

@@ -6,13 +6,13 @@
 #include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_CreateTextureFromSurface, SDL_DestroyTexture
 #include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_free, SDL_calloc
 #include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
-#include <stdint.h>               // uint8_t, uint64_t
+#include <stdint.h>               // uint8_t, int64_t
 #include <stdlib.h>               // exit
 
 // declare properties of `struct animations`
 struct animations {
-    uint64_t * durations;
-    uint64_t ** frame_durations_acc;
+    int64_t * durations;
+    int64_t ** frame_durations_acc;
     SDL_FRect ** frame_srcs;
     int nframes_cap;
     int nanims;
@@ -54,9 +54,9 @@ void animations_delete (struct animations ** self) {
 struct animations * animations_new (int nanims_cap, int nframes_cap, const char * relpath, SDL_Renderer * renderer) {
 
     struct animations * animations = nullptr;
-    uint64_t * durations = nullptr;
+    int64_t * durations = nullptr;
     SDL_FRect ** frame_srcs = nullptr;
-    uint64_t ** frame_durations_acc = nullptr;
+    int64_t ** frame_durations_acc = nullptr;
     int * nframes = nullptr;
 
     // allocate dynamic memory for holding the struct animations (`self`)
@@ -72,7 +72,7 @@ struct animations * animations_new (int nanims_cap, int nframes_cap, const char 
 
     // allocate dynamic memory for holding the 1d array with the animation durations (`.durations`)
     {
-        durations = SDL_calloc(nanims_cap, sizeof(uint64_t));
+        durations = SDL_calloc(nanims_cap, sizeof(int64_t));
         if (durations == nullptr) {
             SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
                             "Couldn't create dynamic memory for storing animation durations, aborting; %s\n",
@@ -105,14 +105,14 @@ struct animations * animations_new (int nanims_cap, int nframes_cap, const char 
 
     // allocate dynamic memory for holding the 2d array with the accumulated frame durations (`.frame_durations_acc`)
     {
-        uint64_t * frame_durations_acc_contig = SDL_calloc(nanims_cap * nframes_cap, sizeof(uint64_t));
+        int64_t * frame_durations_acc_contig = SDL_calloc(nanims_cap * nframes_cap, sizeof(int64_t));
         if (frame_durations_acc_contig == nullptr) {
             SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
                             "Couldn't create contiguous dynamic memory for storing accumated frame durations, aborting; %s\n",
                             SDL_GetError());
             exit(1);
         }
-        frame_durations_acc = SDL_calloc(nanims_cap, sizeof(uint64_t *));
+        frame_durations_acc = SDL_calloc(nanims_cap, sizeof(int64_t *));
         if (frame_durations_acc == nullptr) {
             SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
                             "Couldn't create dynamic memory for storing pointers to accumulated frame durations, aborting; %s\n",
@@ -163,7 +163,7 @@ void animations_append_anim (struct animations * self) {
     self->nanims++;
 }
 
-void animations_append_frame (struct animations * self, uint64_t duration, SDL_FRect src) {
+void animations_append_frame (struct animations * self, int64_t duration, SDL_FRect src) {
 
     // find the index of the next frame in the last animation
     const int ianim = self->nanims - 1;
@@ -185,7 +185,7 @@ void animations_append_frame (struct animations * self, uint64_t duration, SDL_F
     self->nframes[ianim]++;
 }
 
-uint64_t animations_get_animation_duration (struct animations * self, int ianim) {
+int64_t animations_get_animation_duration (struct animations * self, int ianim) {
     return self->durations[ianim];
 }
 
@@ -197,15 +197,22 @@ SDL_Texture * animations_get_texture (const struct animations * self) {
     return self->texture;
 }
 
-void animations_update (const struct animations * self, int ianim, uint64_t anim_phase_shift, uint64_t tnow, uint64_t * t_frame_expires, int * iframe) {
-    // TODO review this part
+void animations_update (const struct animations * self, int ianim, int64_t anim_phase_shift, int64_t tnow, int64_t * t_frame_expires, int * iframe) {
+
+    // calculate time since 0, after applying phase shift
+    const int64_t tshifted = tnow - anim_phase_shift;
+
+    // calculate how many µs we have progressed into the current wavelength / animation duration
+    const int64_t progress = tshifted % self->durations[ianim];
+
+    // keep incrementing *frame until the frame's rhs limit exceeds `tprogress` (or we run out of frames)
     *iframe = 0;
-    const uint64_t tref = tnow - anim_phase_shift;
-    const uint64_t tmod = tref % self->durations[ianim];
-    while (self->frame_durations_acc[ianim][*iframe] < tmod && *iframe < self->nframes[ianim] - 1) {
+    while (self->frame_durations_acc[ianim][*iframe] < progress && *iframe < self->nframes[ianim] - 1) {
         (*iframe)++;
     }
-    *t_frame_expires = tmod + self->frame_durations_acc[ianim][*iframe];
+
+    // update `*t_frame_expires` with the newly identified accumulated duration of `*iframe`
+    *t_frame_expires = tnow - progress + self->frame_durations_acc[ianim][*iframe];
 }
 
 static SDL_Texture * load_texture (const char * relpath, SDL_Renderer * renderer) {

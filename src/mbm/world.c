@@ -10,7 +10,7 @@
 #include "SDL3/SDL_stdinc.h"      // SDL_asprintf, SDL_calloc, SDL_free
 #include "SDL3/SDL_surface.h"     // SDL_Surface, SDL_LoadBMP, SDL_DestroySurface
 #include <assert.h>               // assert
-#include <stdint.h>               // uint64_t, uint8_t
+#include <stdint.h>               // uint8_t
 #include <stdlib.h>               // exit
 #include <sys/param.h>            // MIN
 
