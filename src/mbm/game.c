@@ -1,5 +1,6 @@
 #include "mbm/background.h"       // struct background and associated functions
 #include "mbm/duck.h"             // struct duck and associated functions
+#include "mbm/fpscounter.h"       // struct fpscounter and associated functions
 #include "mbm/game.h"             // struct game and associated functions
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "mbm/world.h"            // struct world and associated functions
@@ -28,6 +29,7 @@ struct game {
     struct background * background;
     DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     struct duck * duck;
+    struct fpscounter * fpscounter;
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     State state;
     struct world * world;
@@ -48,6 +50,7 @@ static void game_update_playing (struct game * self, const struct timings * timi
 void game_delete (struct game ** self) {
 
     // delegate freeing dynamically allocated memory to the respective objects
+    fpscounter_delete(&(*self)->fpscounter);
     duck_delete(&(*self)->duck);
     background_delete(&(*self)->background);
     world_delete(&(*self)->world);
@@ -70,6 +73,7 @@ static void game_draw_playing (const struct game * self, SDL_Renderer * renderer
     background_draw(self->background, renderer);
     world_draw(self->world, renderer);
     duck_draw(self->duck, renderer);
+    fpscounter_draw(self->fpscounter, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, const SDL_Event * event) {
@@ -129,6 +133,10 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     // initialize the duck
     self->duck = duck_new();
     duck_init(self->duck, renderer, dims);
+
+    // initialize the fpscounter
+    self->fpscounter = fpscounter_new();
+    fpscounter_init(self->fpscounter);
 }
 
 struct game * game_new (void) {
@@ -172,4 +180,5 @@ static void game_update_playing (struct game * self, const struct timings * timi
     background_update(self->background, timings);
     world_update(self->world, timings);
     duck_update(self->duck, timings);
+    fpscounter_update(self->fpscounter, timings);
 }

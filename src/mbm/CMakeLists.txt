@@ -62,6 +62,7 @@ target_sources(
         animations.c
         background.c
         duck.c
+        fpscounter.c
         game.c
         timings.c
         world.c
