@@ -133,7 +133,7 @@ struct fpscounter * fpscounter_new (void) {
 }
 
 void fpscounter_toggle (struct fpscounter * self) {
-    self->is_on = false;
+    self->is_on = !self->is_on;
 }
 
 void fpscounter_update (struct fpscounter * self, const struct timings * timings) {

@@ -21,7 +21,7 @@ typedef enum {
 } State;
 
 typedef void (*DrawFunction)(const struct game * game, SDL_Renderer * renderer);
-typedef SDL_AppResult (*HandleEventFunction)(const SDL_Event * event);
+typedef SDL_AppResult (*HandleEventFunction)(struct game * self, const SDL_Event * event);
 typedef void (*UpdateFunction)(struct game * game, const struct timings * timings);
 
 // declare properties of `struct game`
@@ -42,8 +42,8 @@ static struct game * singleton = nullptr;
 // forward function declarations
 static void game_draw_paused (const struct game * self, SDL_Renderer * renderer);
 static void game_draw_playing (const struct game * self, SDL_Renderer * renderer);
-static SDL_AppResult game_handle_event_paused (const SDL_Event * event);
-static SDL_AppResult game_handle_event_playing (const SDL_Event * event);
+static SDL_AppResult game_handle_event_paused (struct game * self, const SDL_Event * event);
+static SDL_AppResult game_handle_event_playing (struct game * self, const SDL_Event * event);
 static void game_update_paused (struct game * self, const struct timings * timings);
 static void game_update_playing (struct game * self, const struct timings * timings);
 
@@ -77,10 +77,11 @@ static void game_draw_playing (const struct game * self, SDL_Renderer * renderer
 }
 
 SDL_AppResult game_handle_event (struct game * self, const SDL_Event * event) {
-    return self->handle_event_functions[self->state](event);
+    return self->handle_event_functions[self->state](self, event);
 }
 
-static SDL_AppResult game_handle_event_paused (const SDL_Event * event) {
+static SDL_AppResult game_handle_event_paused (struct game * self, const SDL_Event * event) {
+    (void) self;
     switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
@@ -91,13 +92,17 @@ static SDL_AppResult game_handle_event_paused (const SDL_Event * event) {
     return SDL_APP_CONTINUE;
 }
 
-static SDL_AppResult game_handle_event_playing (const SDL_Event * event) {
+static SDL_AppResult game_handle_event_playing (struct game * self, const SDL_Event * event) {
     switch (event->type) {
         case SDL_EVENT_QUIT:
             return SDL_APP_SUCCESS;
         case SDL_EVENT_KEY_DOWN:
-            if (event->key.key == SDLK_ESCAPE || event->key.key == SDLK_Q)
-            return SDL_APP_SUCCESS;
+            if (event->key.key == SDLK_ESCAPE || event->key.key == SDLK_Q) {
+                return SDL_APP_SUCCESS;
+            }
+            if (event->key.key == SDLK_F) {
+                fpscounter_toggle(self->fpscounter);
+            }
     }
     return SDL_APP_CONTINUE;
 }
