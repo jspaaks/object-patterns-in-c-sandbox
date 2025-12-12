@@ -1,14 +1,14 @@
 #include "mbm/fpscounter.h"
-#include "mbm/timings.h"            // struct timings and associated functions
-#include "SDL3/SDL_error.h"         // SDL_GetError
-#include "SDL3/SDL_log.h"           // SDL_LogCritical
-#include "SDL3/SDL_pixels.h"        // SDL_Color
-#include "SDL3/SDL_rect.h"          // SDL_FRect
-#include "SDL3/SDL_render.h"        // SDL_Renderer
-#include "SDL3/SDL_stdinc.h"        // SDL_snprintf, SDL_free, SDL_calloc
-#include <SDL3_ttf/SDL_ttf.h>       // TTF_Font, TTF_OpenFont, TTF_CloseFont, TTF_RenderText_Shaded
-#include <stdint.h>                 // int64_t
-#include <stdlib.h>                 // exit
+#include "mbm/timings.h"          // struct timings and associated functions
+#include "SDL3/SDL_error.h"       // SDL_GetError
+#include "SDL3/SDL_log.h"         // SDL_LogCritical
+#include "SDL3/SDL_pixels.h"      // SDL_Color
+#include "SDL3/SDL_rect.h"        // SDL_FRect
+#include "SDL3/SDL_render.h"      // SDL_Renderer
+#include "SDL3/SDL_stdinc.h"      // SDL_snprintf, SDL_free, SDL_calloc
+#include <SDL3_ttf/SDL_ttf.h>     // TTF_Font, TTF_OpenFont, TTF_CloseFont, TTF_RenderText_Shaded
+#include <stdint.h>               // int64_t
+#include <stdlib.h>               // exit
 
 // declare properties of `struct fpscounter`
 struct fpscounter {
