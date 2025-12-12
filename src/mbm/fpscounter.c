@@ -107,7 +107,7 @@ void fpscounter_init (struct fpscounter * self) {
         .interval = (int64_t) 5e5,
         .is_on = true,
         .ptsize = ptsize,
-        .scale = 0.5,
+        .scale = 0.25,
         .texpires = (int64_t) 0,
         .text = 0.0f,
         .wld = (SDL_FPoint) {
