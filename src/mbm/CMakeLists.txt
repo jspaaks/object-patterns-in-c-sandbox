@@ -40,14 +40,17 @@ target_include_directories(
     tgt_lib_mbm
     PRIVATE
         ../../include
-        ../../third_party/SDL/include
         ../../third_party/libidx/include
+        ../../third_party/SDL/include
+        ../../third_party/SDL_ttf/include
 )
 
 target_link_libraries(
     tgt_lib_mbm
     PRIVATE
         tgt_lib_idx
+        SDL3::SDL3
+        SDL3_ttf::SDL3_ttf
 )
 
 target_link_options(

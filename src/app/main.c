@@ -13,6 +13,7 @@
 #include "SDL3/SDL_timer.h"       // SDL_GetTicksNS
 #include "SDL3/SDL_video.h"       // SDL_Window, SDL_WindowFlags, defines
 #include "SDL3/SDL.h"
+#include "SDL3_ttf/SDL_ttf.h"     // TTF_Init, TTF_Quit
 #include <stdlib.h>               // atexit, exit
 
 // forward declaration of static functions
@@ -97,6 +98,9 @@ SDL_AppResult SDL_AppInit(void ** appstate_vpp, int argc, char * argv[]) {
     // initialize the window and renderer
     init_sdl_window_and_renderer(window_flags, &dims, &renderer, &window);
 
+    // initialize fonts
+    TTF_Init();
+
     // initialize the timings object
     timings = timings_new();
     timings_init(timings);
@@ -170,6 +174,9 @@ void SDL_AppQuit(void * appstate_vp, SDL_AppResult result) {
         SDL_free(appstate_vp);
         appstate_vp = nullptr;
     }
+
+   // clean up resources held by the fonts module
+    TTF_Quit();
 
     // exit with result status
     exit(result);

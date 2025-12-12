@@ -32,14 +32,15 @@ target_include_directories(
     PRIVATE
         ../../include
         ../../third_party/SDL/include
+        ../../third_party/SDL_ttf/include
 )
 
 target_link_libraries(
     tgt_exe_mbm
     PRIVATE
-        m
         tgt_lib_mbm
         SDL3::SDL3
+        SDL3_ttf::SDL3_ttf
 )
 
 target_link_options(
