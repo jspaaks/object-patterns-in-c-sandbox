@@ -3,7 +3,8 @@
 #include "mbm/abi.h"
 #include <stdint.h>
 
-// `struct timings` is an opaque data structure
+// `struct timings` is an opaque data structure;
+// only the implementation has access to its layout
 struct timings;
 
 MBM_ABI void timings_delete (struct timings ** self);

@@ -9,7 +9,8 @@
 #include "SDL3/SDL_render.h"      // SDL_Renderer
 #include "SDL3/SDL_video.h"       // SDL_Window
 
-// `struct game` is an opaque data structure
+// `struct game` is an opaque data structure;
+// only the implementation has access to its layout
 struct game;
 
 MBM_ABI void game_delete (struct game ** self);

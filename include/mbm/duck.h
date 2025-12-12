@@ -5,7 +5,8 @@
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture
 
-// `struct duck` is an opaque data structure
+// `struct duck` is an opaque data structure;
+// only the implementation has access to its layout
 struct duck;
 
 MBM_ABI void duck_delete (struct duck ** self);

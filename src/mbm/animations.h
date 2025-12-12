@@ -5,7 +5,8 @@
 #include "SDL3/SDL_render.h"      // SDL_Renderer
 #include <stdint.h>               // int64_t
 
-// `struct animations` is an opaque data structure
+// `struct animations` is an opaque data structure;
+// only the implementation has access to its layout
 struct animations;
 
 MBM_NO_ABI void animations_delete (struct animations ** self);

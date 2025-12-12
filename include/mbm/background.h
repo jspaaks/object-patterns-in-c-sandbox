@@ -4,7 +4,8 @@
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "SDL3/SDL_render.h"      // SDL_Renderer
 
-// `struct background` is an opaque data structure
+// `struct background` is an opaque data structure;
+// only the implementation has access to its layout
 struct background;
 
 MBM_ABI void background_delete (struct background ** self);
