@@ -91,15 +91,12 @@ _This project was initialized using [Copier](https://pypi.org/project/copier) an
 
 Project limits for the time being
 
-1. animated sprites
 1. collision detection
 1. paused gamestate
 1. keybindings
-1. gamestate specific event handling
-
 
 TODO
 - look into SDL_TEXTUREACCESS_STREAMING, SDL_UpdateTexture, SDL_LockTextureToSurface for efficient
   display of fpscounter
-
+- look into gamestate-specific event handling
 -->
