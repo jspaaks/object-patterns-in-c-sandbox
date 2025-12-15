@@ -1,11 +1,10 @@
 # Developer notes
 
-Converting an svg to bmp
+## Dependencies - vendored
 
-```console
-$ convert -density 96 tiles.svg tiles.bmp 
-```
-
+- SDL 3.2.26
+- SDL_ttf 3.2.2
+- libidx (bleeding)
 
 ## About `animations_update()`
 
