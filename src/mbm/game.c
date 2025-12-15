@@ -184,6 +184,6 @@ static void game_update_playing (struct game * self, const struct timings * timi
     }
     background_update(self->background, timings);
     world_update(self->world, timings);
-    duck_update(self->duck, timings);
+    duck_update(self->duck, self->world, timings);
     fpscounter_update(self->fpscounter, timings);
 }

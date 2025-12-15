@@ -23,6 +23,7 @@ typedef enum : uint8_t {
 
 // declare properties of `struct world`
 struct world {
+    float gravity;  // pixels per second per second
     int h;
     int ncols;
     int nrows;
@@ -162,6 +163,10 @@ void world_draw (const struct world * self, SDL_Renderer * renderer) {
     }
 }
 
+float world_get_gravity (const struct world * self) {
+    return self->gravity;
+}
+
 void world_init (struct world * self, SDL_Renderer * renderer, const struct dims * dims) {
     int nrows = dims->view.h / dims->tile.h;
     int ncols = dims->world.w / dims->tile.w;
@@ -176,6 +181,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     load_tile_map("../share/mbm/assets/tilemaps/level1.idx", nrows, ncols, tile_types[0]);
 
     *self = (struct world) {
+        .gravity = 150.0f,
         .h = dims->world.h,
         .ncols = ncols,
         .nrows = nrows,

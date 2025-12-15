@@ -7,6 +7,7 @@
 #include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_RenderTexture
 #include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
 #include <stdlib.h>               // exit
+#include <sys/param.h>            // MIN
 
 // define enum for animation states
 enum animation_state: uint8_t {
@@ -17,11 +18,14 @@ enum animation_state: uint8_t {
 
 // declare properties of `struct duck`
 struct duck {
+    int64_t anim_phase_shift;
     struct animations * animations;
     enum animation_state ianim;
     int iframe;
     int64_t t_frame_expires;
-    int64_t anim_phase_shift;
+    float vx;
+    float vy;
+    float vy_term;
     SDL_FRect wld;
 };
 
@@ -61,16 +65,19 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
     animations_append_frame(animations, (int64_t) 1e5, (SDL_FRect) { .h = h, .w = w, .x = 5 * w, .y = ANIMATION_STATE_WALKING * h });
 
     *self = (struct duck) {
+        .anim_phase_shift = (int64_t) 0,
         .animations = animations,
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
-        .anim_phase_shift = (int64_t) 0,
         .t_frame_expires = INT64_MIN,
+        .vx = 0.0f,
+        .vy = 0.0f,
+        .vy_term = 100.0f,
         .wld = (SDL_FRect) {
             .h = 32.0f,
             .w = 32.0f,
             .x = 100.0f,
-            .y = dims->world.h - 32.0f - 32.0f,
+            .y = dims->world.h - 32.0f - 32.0f - 100.0f,
         },
     };
 }
@@ -102,7 +109,7 @@ void duck_set_animation_state_walking (struct duck * self) {
     self->t_frame_expires = INT64_MIN;   // triggers animations_update() in duck_update()
 }
 
-void duck_update (struct duck * self, const struct timings * timings) {
+void duck_update (struct duck * self, const struct world * world, const struct timings * timings) {
     int64_t tnow = timings_get_frame_timestamp(timings);
     if (self->t_frame_expires == INT64_MIN) {
         // determine the animation phase shift the first time after starting animation
@@ -111,4 +118,8 @@ void duck_update (struct duck * self, const struct timings * timings) {
     if (tnow > self->t_frame_expires) {
         animations_update(self->animations, self->ianim, self->anim_phase_shift, tnow, &self->t_frame_expires, &self->iframe);
     }
+    float dt = timings_get_frame_duration(timings);
+    float g = world_get_gravity(world);
+    self->vy = MIN(self->vy_term, self->vy + 0.5 * g * dt);
+    self->wld.y += self->vy * dt;
 }
