@@ -99,4 +99,5 @@ TODO
 - look into SDL_TEXTUREACCESS_STREAMING, SDL_UpdateTexture, SDL_LockTextureToSurface for efficient
   display of fpscounter
 - look into gamestate-specific event handling
+- look into offscreen rendering for tests
 -->
