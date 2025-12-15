@@ -25,7 +25,7 @@ struct duck {
     int64_t t_frame_expires;
     float vx;
     float vy;
-    float vy_term;
+    float vyterm;
     SDL_FRect wld;
 };
 
@@ -72,7 +72,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .t_frame_expires = INT64_MIN,
         .vx = 0.0f,
         .vy = 0.0f,
-        .vy_term = 100.0f,
+        .vyterm = 100.0f,
         .wld = (SDL_FRect) {
             .h = 32.0f,
             .w = 32.0f,
@@ -120,6 +120,6 @@ void duck_update (struct duck * self, const struct world * world, const struct t
     }
     float dt = timings_get_frame_duration(timings);
     float g = world_get_gravity(world);
-    self->vy = MIN(self->vy_term, self->vy + 0.5 * g * dt);
+    self->vy = MAX(-1 * self->vyterm, MIN(self->vyterm, self->vy + 0.5 * g * dt));
     self->wld.y += self->vy * dt;
 }
