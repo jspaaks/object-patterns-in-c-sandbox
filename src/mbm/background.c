@@ -27,9 +27,9 @@ void background_draw (const struct background * self, SDL_Renderer * renderer) {
 void background_init (struct background * self) {
     *self = (struct background) {
         .color = (SDL_Color) {
-            .r = 0,
-            .g = 0,
-            .b = 0,
+            .r = 12,
+            .g = 121,
+            .b = 168,
             .a = SDL_ALPHA_OPAQUE,
         },
     };

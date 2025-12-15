@@ -151,6 +151,7 @@ void world_draw (const struct world * self, SDL_Renderer * renderer) {
     for (int irow = 0; irow < self->nrows; irow++) {
         for (int icol = icol_s; icol < icol_e; icol++) {
             TileType t = self->tile.types[irow][icol];
+            if (t == TILE_TYPE_AIR) continue;
             SDL_FRect src = self->tile.srcs[t];
             SDL_FRect wld = {
                 .h = (float) (self->tile.h),
