@@ -11,7 +11,7 @@ struct timings {
     struct {
         int64_t tprev;                        // microseconds
         int64_t tthis;                        // microseconds
-        float duration;                        // seconds
+        float duration;                       // seconds
     } frame;
 };
 
@@ -34,7 +34,7 @@ int64_t timings_get_frame_timestamp (const struct timings * self) {
 void timings_init (struct timings * self) {
     *self = (struct timings) {
         .frame = {
-            .duration = 0,                     // seconds
+            .duration = 0.0f,                              // seconds
             .tprev = (int64_t) (SDL_GetTicksNS() / 1000),  // microseconds
             .tthis = (int64_t) (SDL_GetTicksNS() / 1000),  // microseconds
         },
