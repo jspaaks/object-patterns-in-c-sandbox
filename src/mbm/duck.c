@@ -113,9 +113,9 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
             .y = 100.0f,
         },
         .pos = (SDL_FRect) {
-            .h = 32.0f,
-            .w = 32.0f,
-            .x = 100.0f,
+            .h = h,
+            .w = w,
+            .x = 2 * dims->tile.w,
             .y = dims->wld.h - dims->tile.h - h,
         },
     };
