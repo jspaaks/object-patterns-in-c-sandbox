@@ -15,7 +15,7 @@ struct game;
 
 MBM_ABI void game_delete (struct game ** self);
 MBM_ABI void game_draw (const struct game * self, SDL_Renderer * renderer);
-MBM_ABI SDL_AppResult game_handle_event (struct game * self, const SDL_Event * event);
+MBM_ABI SDL_AppResult game_handle_event (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
 MBM_ABI void game_init (struct game * self, SDL_Renderer * renderer, const struct dims * dims);
 MBM_ABI struct game * game_new (void);
 MBM_ABI void game_update (struct game * self, const struct timings * timings);

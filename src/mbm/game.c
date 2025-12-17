@@ -21,7 +21,7 @@ typedef enum {
 } State;
 
 typedef void (*DrawFunction)(const struct game * game, SDL_Renderer * renderer);
-typedef SDL_AppResult (*HandleEventFunction)(struct game * self, const SDL_Event * event);
+typedef SDL_AppResult (*HandleEventFunction)(struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
 typedef void (*UpdateFunction)(struct game * game, const struct timings * timings);
 
 // declare properties of `struct game`
@@ -32,6 +32,7 @@ struct game {
     struct fpscounter * fpscounter;
     HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
     State state;
+    bool vsync_enabled;
     struct world * world;
     UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
@@ -42,8 +43,8 @@ static struct game * singleton = nullptr;
 // forward function declarations
 static void game_draw_paused (const struct game * self, SDL_Renderer * renderer);
 static void game_draw_playing (const struct game * self, SDL_Renderer * renderer);
-static SDL_AppResult game_handle_event_paused (struct game * self, const SDL_Event * event);
-static SDL_AppResult game_handle_event_playing (struct game * self, const SDL_Event * event);
+static SDL_AppResult game_handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
+static SDL_AppResult game_handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
 static void game_update_paused (struct game * self, const struct timings * timings);
 static void game_update_playing (struct game * self, const struct timings * timings);
 
@@ -76,33 +77,45 @@ static void game_draw_playing (const struct game * self, SDL_Renderer * renderer
     fpscounter_draw(self->fpscounter, renderer);
 }
 
-SDL_AppResult game_handle_event (struct game * self, const SDL_Event * event) {
-    return self->handle_event_functions[self->state](self, event);
+SDL_AppResult game_handle_event (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
+    return self->handle_event_functions[self->state](self, renderer, event);
 }
 
-static SDL_AppResult game_handle_event_paused (struct game * self, const SDL_Event * event) {
+static SDL_AppResult game_handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
     (void) self;
+    (void) renderer;
     switch (event->type) {
-        case SDL_EVENT_QUIT:
+    case SDL_EVENT_QUIT:
+        return SDL_APP_SUCCESS;
+    case SDL_EVENT_KEY_DOWN:
+        switch (event->key.key) {
+        case SDLK_ESCAPE:
             return SDL_APP_SUCCESS;
-        case SDL_EVENT_KEY_DOWN:
-            if (event->key.key == SDLK_ESCAPE || event->key.key == SDLK_Q)
+        case SDLK_Q:
             return SDL_APP_SUCCESS;
+        }
     }
     return SDL_APP_CONTINUE;
 }
 
-static SDL_AppResult game_handle_event_playing (struct game * self, const SDL_Event * event) {
+static SDL_AppResult game_handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
     switch (event->type) {
-        case SDL_EVENT_QUIT:
+    case SDL_EVENT_QUIT:
+        return SDL_APP_SUCCESS;
+    case SDL_EVENT_KEY_DOWN:
+        switch (event->key.key) {
+        case SDLK_ESCAPE:
             return SDL_APP_SUCCESS;
-        case SDL_EVENT_KEY_DOWN:
-            if (event->key.key == SDLK_ESCAPE || event->key.key == SDLK_Q) {
-                return SDL_APP_SUCCESS;
-            }
-            if (event->key.key == SDLK_F) {
-                fpscounter_toggle(self->fpscounter);
-            }
+        case SDLK_Q:
+            return SDL_APP_SUCCESS;
+        case SDLK_F:
+            fpscounter_toggle(self->fpscounter);
+            break;
+        case SDLK_V:
+            self->vsync_enabled = !self->vsync_enabled;
+            SDL_SetRenderVSync(renderer, self->vsync_enabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED);
+            break;
+        }
     }
     return SDL_APP_CONTINUE;
 }
@@ -126,6 +139,9 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
 
     // initialize the gamestate
     self->state = MBM_GAME_STATE_PLAYING;
+
+    // initialize vsync
+    self->vsync_enabled = false;
 
     // initialize the background
     self->background = background_new();

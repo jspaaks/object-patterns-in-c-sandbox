@@ -49,7 +49,7 @@ static void init_sdl_window_and_renderer (SDL_WindowFlags flags, struct dims * d
 SDL_AppResult SDL_AppEvent(void * appstate_vp, SDL_Event * event) {
     // make the void pointer appstate_vp usable by casting it as a struct appstate pointer
     struct appstate * appstate = (struct appstate *) appstate_vp;
-    return game_handle_event(appstate->game, event);
+    return game_handle_event(appstate->game, appstate->renderer, event);
 }
 
 // `SDL_AppInit` runs once at startup`
