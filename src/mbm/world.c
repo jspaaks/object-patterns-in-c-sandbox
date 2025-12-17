@@ -223,21 +223,6 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     };
 }
 
-void world_move_view_left (struct world * self, const struct timings * timings) {
-    float dt = timings_get_frame_duration(timings);
-    float a = 0;
-    float b = self->view.x - (self->view.dx * dt);
-    self->view.x = MAX(a, b);
-}
-
-void world_move_view_right (struct world * self, const struct timings * timings) {
-    float dt = timings_get_frame_duration(timings);
-    float a = self->view.x + (self->view.dx * dt);
-    float b = self->w - self->view.w;
-    self->view.x = MIN(a, b);
-
-}
-
 struct world * world_new (void) {
     if (singleton != nullptr) {
         // memory has already been allocated for `singleton`

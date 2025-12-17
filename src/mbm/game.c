@@ -185,17 +185,16 @@ static void game_update_paused (struct game * self, const struct timings * timin
 }
 
 static void game_update_playing (struct game * self, const struct timings * timings) {
+    duck_set_animation_state_idle(self->duck);
     const bool * key_states = SDL_GetKeyboardState(nullptr);
     if (key_states[SDL_SCANCODE_LEFT]) {
-        world_move_view_left(self->world, timings);
+        duck_face_left(self->duck);
+        duck_move_left(self->duck, timings);
+        duck_set_animation_state_walking(self->duck);
     }
     if (key_states[SDL_SCANCODE_RIGHT]) {
-        world_move_view_right(self->world, timings);
-    }
-    if (key_states[SDL_SCANCODE_I]) {
-        duck_set_animation_state_idle(self->duck);
-    }
-    if (key_states[SDL_SCANCODE_W]) {
+        duck_face_right(self->duck);
+        duck_move_right(self->duck, timings);
         duck_set_animation_state_walking(self->duck);
     }
     background_update(self->background, timings);

@@ -4,8 +4,9 @@
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_rect.h"        // SDL_FRect
-#include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_RenderTexture
+#include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_RenderTextureRotated
 #include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
+#include "SDL3/SDL_surface.h"     // SDL_FlipMode
 #include <stdlib.h>               // exit
 #include <sys/param.h>            // MIN
 
@@ -22,10 +23,11 @@ struct duck {
     struct animations * animations;
     enum animation_state ianim;
     int iframe;
+    bool is_facing_right;
     int64_t t_frame_expires;
-    float vx;
     float vy;
     float vyterm;
+    float walking_speed;
     SDL_FRect wld;
 };
 
@@ -42,7 +44,16 @@ void duck_delete (struct duck ** self) {
 void duck_draw (const struct duck * self, SDL_Renderer * renderer) {
     SDL_FRect src = animations_get_frame(self->animations, self->ianim, self->iframe);
     SDL_Texture * texture = animations_get_texture(self->animations);
-    SDL_RenderTexture(renderer, texture, &src, &self->wld);
+    SDL_FlipMode flipmode = self->is_facing_right ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+    SDL_RenderTextureRotated(renderer, texture, &src, &self->wld, 0, nullptr, flipmode);
+}
+
+void duck_face_left (struct duck * self) {
+    self->is_facing_right = false;
+}
+
+void duck_face_right (struct duck * self) {
+    self->is_facing_right = true;
 }
 
 void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims * dims) {
@@ -69,10 +80,11 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .animations = animations,
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
+        .is_facing_right = true,
         .t_frame_expires = INT64_MIN,
-        .vx = 0.0f,
         .vy = 0.0f,
         .vyterm = 100.0f,
+        .walking_speed = 20.0f,
         .wld = (SDL_FRect) {
             .h = 32.0f,
             .w = 32.0f,
@@ -80,6 +92,16 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
             .y = dims->world.h - 32.0f - 32.0f - 100.0f,
         },
     };
+}
+
+void duck_move_left (struct duck * self, const struct timings * timings) {
+    float dt = timings_get_frame_duration(timings);
+    self->wld.x -= self->walking_speed * dt;
+}
+
+void duck_move_right (struct duck * self, const struct timings * timings) {
+    float dt = timings_get_frame_duration(timings);
+    self->wld.x += self->walking_speed * dt;
 }
 
 struct duck * duck_new (void) {
