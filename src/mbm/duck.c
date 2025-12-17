@@ -8,7 +8,6 @@
 #include "SDL3/SDL_stdinc.h"      // SDL_free, SDL_calloc
 #include "SDL3/SDL_surface.h"     // SDL_FlipMode
 #include <stdlib.h>               // exit
-#include <sys/param.h>            // MIN
 
 // define enum for animation states
 enum animation_state: uint8_t {
@@ -24,15 +23,32 @@ struct duck {
     enum animation_state ianim;
     int iframe;
     bool is_facing_right;
+    struct {
+        struct {
+            float current;
+            float walking;
+        } x;
+        struct {
+            float current;
+        } y;
+    } v;
+    struct {
+         float y;
+    } vmax;
     int64_t t_frame_expires;
-    float vy;
-    float vyterm;
-    float walking_speed;
-    SDL_FRect wld;
+    SDL_FRect pos;
 };
+
+static float clamp (float v, float vmin, float vmax);
 
 // define pointer to singleton instance of `struct duck`
 static struct duck * singleton = nullptr;
+
+static float clamp (float v, float vmin, float vmax) {
+    if (v < vmin) return vmin;
+    if (v > vmax) return vmax;
+    return v;
+}
 
 void duck_delete (struct duck ** self) {
     animations_delete(&(*self)->animations);
@@ -45,15 +61,17 @@ void duck_draw (const struct duck * self, SDL_Renderer * renderer) {
     SDL_FRect src = animations_get_frame(self->animations, self->ianim, self->iframe);
     SDL_Texture * texture = animations_get_texture(self->animations);
     SDL_FlipMode flipmode = self->is_facing_right ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-    SDL_RenderTextureRotated(renderer, texture, &src, &self->wld, 0, nullptr, flipmode);
+    SDL_RenderTextureRotated(renderer, texture, &src, &self->pos, 0, nullptr, flipmode);
 }
 
-void duck_face_left (struct duck * self) {
-    self->is_facing_right = false;
-}
+void duck_halt (struct duck * self) {
+    self->v.x.current = 0.0f;
+    if (self->ianim != ANIMATION_STATE_IDLE) {
+        self->ianim = ANIMATION_STATE_IDLE;
+        // trigger animations_update() in duck_update()
+        self->t_frame_expires = INT64_MIN;
+    }
 
-void duck_face_right (struct duck * self) {
-    self->is_facing_right = true;
 }
 
 void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims * dims) {
@@ -82,26 +100,25 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .iframe = 0,
         .is_facing_right = true,
         .t_frame_expires = INT64_MIN,
-        .vy = 0.0f,
-        .vyterm = 100.0f,
-        .walking_speed = 20.0f,
-        .wld = (SDL_FRect) {
+        .v = {
+            .x = {
+                .current = 0.0f,
+                .walking = 20.0f,
+            },
+            .y = {
+                .current = 0.0f,
+            }
+        },
+        .vmax = {
+            .y = 100.0f,
+        },
+        .pos = (SDL_FRect) {
             .h = 32.0f,
             .w = 32.0f,
             .x = 100.0f,
             .y = dims->world.h - 32.0f - 32.0f - 100.0f,
         },
     };
-}
-
-void duck_move_left (struct duck * self, const struct timings * timings) {
-    float dt = timings_get_frame_duration(timings);
-    self->wld.x -= self->walking_speed * dt;
-}
-
-void duck_move_right (struct duck * self, const struct timings * timings) {
-    float dt = timings_get_frame_duration(timings);
-    self->wld.x += self->walking_speed * dt;
 }
 
 struct duck * duck_new (void) {
@@ -119,18 +136,6 @@ struct duck * duck_new (void) {
     return singleton;
 }
 
-void duck_set_animation_state_idle (struct duck * self) {
-    if (self->ianim == ANIMATION_STATE_IDLE) return;
-    self->ianim = ANIMATION_STATE_IDLE;
-    self->t_frame_expires = INT64_MIN;   // triggers animations_update() in duck_update()
-}
-
-void duck_set_animation_state_walking (struct duck * self) {
-    if (self->ianim == ANIMATION_STATE_WALKING) return;
-    self->ianim = ANIMATION_STATE_WALKING;
-    self->t_frame_expires = INT64_MIN;   // triggers animations_update() in duck_update()
-}
-
 void duck_update (struct duck * self, const struct world * world, const struct timings * timings) {
     int64_t tnow = timings_get_frame_timestamp(timings);
     if (self->t_frame_expires == INT64_MIN) {
@@ -142,6 +147,27 @@ void duck_update (struct duck * self, const struct world * world, const struct t
     }
     float dt = timings_get_frame_duration(timings);
     float g = world_get_gravity(world);
-    self->vy = MAX(-1 * self->vyterm, MIN(self->vyterm, self->vy + 0.5 * g * dt));
-    self->wld.y += self->vy * dt;
+    self->v.y.current = clamp(self->v.y.current + 0.5 * g * dt, -1 * self->vmax.y, self->vmax.y);
+    self->pos.x += self->v.x.current * dt;
+    self->pos.y += self->v.y.current * dt;
+}
+
+void duck_walk_left (struct duck * self) {
+    self->is_facing_right = false;
+    self->v.x.current = -1.0f * self->v.x.walking;
+    if (self->ianim != ANIMATION_STATE_WALKING) {
+        self->ianim = ANIMATION_STATE_WALKING;
+        // trigger animations_update() in duck_update()
+        self->t_frame_expires = INT64_MIN;
+    }
+}
+
+void duck_walk_right (struct duck * self) {
+    self->is_facing_right = true;
+    self->v.x.current = self->v.x.walking;
+    if (self->ianim != ANIMATION_STATE_WALKING) {
+        self->ianim = ANIMATION_STATE_WALKING;
+        // trigger animations_update() in duck_update()
+        self->t_frame_expires = INT64_MIN;
+    }
 }
