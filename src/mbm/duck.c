@@ -21,6 +21,7 @@ struct duck {
     int64_t anim_phase_shift;
     struct animations * animations;
     enum animation_state ianim;
+    SDL_FRect bbox;
     int iframe;
     bool is_facing_right;
     struct {
@@ -62,6 +63,13 @@ void duck_draw (const struct duck * self, SDL_Renderer * renderer) {
     SDL_Texture * texture = animations_get_texture(self->animations);
     SDL_FlipMode flipmode = self->is_facing_right ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
     SDL_RenderTextureRotated(renderer, texture, &src, &self->pos, 0, nullptr, flipmode);
+#ifdef MBM_DRAW_BBOXES
+    SDL_FRect rect = self->bbox;
+    rect.x += self->pos.x;
+    rect.y += self->pos.y;
+    SDL_SetRenderDrawColor (renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    SDL_RenderRect(renderer, &rect);
+#endif // MBM_DRAW_BBOXES
 }
 
 void duck_halt (struct duck * self) {
@@ -96,6 +104,12 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
     *self = (struct duck) {
         .anim_phase_shift = (int64_t) 0,
         .animations = animations,
+        .bbox = (SDL_FRect) {
+            .h = h - 8.0f,
+            .w = w - 6.0f,
+            .x = 2.0f,
+            .y = 8.0f,
+        },
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
         .is_facing_right = true,

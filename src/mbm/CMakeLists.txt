@@ -15,6 +15,7 @@ target_compile_definitions(
     tgt_lib_mbm
     PRIVATE
         $<$<CONFIG:Debug>:DEBUG>
+        $<$<BOOL:${MBM_DRAW_BBOXES}>:MBM_DRAW_BBOXES>
 )
 
 target_compile_features(

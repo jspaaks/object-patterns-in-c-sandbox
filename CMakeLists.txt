@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.23...3.28 FATAL_ERROR)
 project(mbm LANGUAGES C)
 
 option(MBM_APP_WITH_ASAN "Whether to enable address sanitizing for executable 'mbm'" OFF)
+option(MBM_DRAW_BBOXES "Whether to draw bounding boxes around objects" OFF)
 option(MBM_LIB_WITH_ASAN "Whether to enable address sanitizing for library 'mbm'" OFF)
 option(MBM_USE_VENDORED_SDL3 "Whether to use SDL3 from vendored or system" ON)
 option(MBM_USE_VENDORED_SDL3_TTF "Whether to use SDL3_ttf from vendored or system" ON)

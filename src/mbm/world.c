@@ -23,6 +23,7 @@ typedef enum : uint8_t {
 
 // declare properties of `struct world`
 struct world {
+    SDL_FRect bbox;
     float gravity;  // pixels per second per second
     int h;
     int ncols;
@@ -162,6 +163,10 @@ void world_draw (const struct world * self, SDL_Renderer * renderer) {
             SDL_RenderTexture(renderer, self->tile.texture, &src, &wld);
         }
     }
+#ifdef MBM_DRAW_BBOXES
+    SDL_SetRenderDrawColor (renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    SDL_RenderRect(renderer, &self->bbox);
+#endif // MBM_DRAW_BBOXES
 }
 
 float world_get_gravity (const struct world * self) {
@@ -182,6 +187,12 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     load_tile_map("../share/mbm/assets/tilemaps/level1.idx", nrows, ncols, tile_types[0]);
 
     *self = (struct world) {
+        .bbox = (SDL_FRect) {
+            .h = dims->tile.h,
+            .w = 4 * dims->tile.w,
+            .x = 12 * dims->tile.w,
+            .y = 5 * dims->tile.h,
+        },
         .gravity = 10.0f,
         .h = dims->wld.h,
         .ncols = ncols,
