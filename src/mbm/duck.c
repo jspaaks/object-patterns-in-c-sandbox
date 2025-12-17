@@ -64,12 +64,13 @@ void duck_draw (const struct duck * self, SDL_Renderer * renderer) {
     SDL_FlipMode flipmode = self->is_facing_right ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
     SDL_RenderTextureRotated(renderer, texture, &src, &self->pos, 0, nullptr, flipmode);
 #ifdef MBM_DRAW_BBOXES
-    SDL_FRect rect = self->bbox;
-    rect.x += self->pos.x;
-    rect.y += self->pos.y;
     SDL_SetRenderDrawColor (renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-    SDL_RenderRect(renderer, &rect);
+    SDL_RenderRect(renderer, &self->bbox);
 #endif // MBM_DRAW_BBOXES
+}
+
+SDL_FRect duck_get_bbox (const struct duck * self) {
+    return self->bbox;
 }
 
 void duck_halt (struct duck * self) {
@@ -83,9 +84,10 @@ void duck_halt (struct duck * self) {
 }
 
 void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims * dims) {
-
     float h = 32.0f;
     float w = 32.0f;
+    float x = 14 * dims->tile.w;
+    float y = dims->wld.h - 6 * dims->tile.h - h;
     int nanims_cap = 2;
     int nframes_cap = 6;
     const char * relpath = "../share/mbm/assets/images/duck.bmp";
@@ -107,8 +109,8 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .bbox = (SDL_FRect) {
             .h = h - 8.0f,
             .w = w - 6.0f,
-            .x = 2.0f,
-            .y = 8.0f,
+            .x = x + 2.0f,
+            .y = y + 8.0f,
         },
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
@@ -129,8 +131,8 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .pos = (SDL_FRect) {
             .h = h,
             .w = w,
-            .x = 2 * dims->tile.w,
-            .y = dims->wld.h - dims->tile.h - h,
+            .x = x,
+            .y = y,
         },
     };
 }
@@ -150,6 +152,11 @@ struct duck * duck_new (void) {
     return singleton;
 }
 
+void duck_translate_y (struct duck * self, float dy) {
+    self->pos.y += dy;
+    self->bbox.y += dy;
+}
+
 void duck_update (struct duck * self, const struct world * world, const struct timings * timings) {
     int64_t tnow = timings_get_frame_timestamp(timings);
     if (self->t_frame_expires == INT64_MIN) {
@@ -162,8 +169,12 @@ void duck_update (struct duck * self, const struct world * world, const struct t
     float dt = timings_get_frame_duration(timings);
     float g = world_get_gravity(world);
     self->v.y.current = clamp(self->v.y.current + 0.5 * g * dt, -1 * self->vmax.y, self->vmax.y);
-    self->pos.x += self->v.x.current * dt;
-    self->pos.y += self->v.y.current * dt;
+    float dx = self->v.x.current * dt;
+    float dy = self->v.y.current * dt;
+    self->pos.x += dx;
+    self->pos.y += dy;
+    self->bbox.x += dx;
+    self->bbox.y += dy;
 }
 
 void duck_walk_left (struct duck * self) {

@@ -169,6 +169,10 @@ void world_draw (const struct world * self, SDL_Renderer * renderer) {
 #endif // MBM_DRAW_BBOXES
 }
 
+SDL_FRect world_get_bbox (const struct world * self) {
+    return self->bbox;
+}
+
 float world_get_gravity (const struct world * self) {
     return self->gravity;
 }
