@@ -20,7 +20,7 @@ struct fpscounter {
     int64_t interval;
     float scale;
     int64_t texpires;
-    char text[10];
+    char text[24];
     SDL_FPoint wld;
 };
 
@@ -109,7 +109,7 @@ void fpscounter_init (struct fpscounter * self) {
         .ptsize = ptsize,
         .scale = 0.25,
         .texpires = (int64_t) 0,
-        .text = 0.0f,
+        .text = "--- FPS",
         .wld = (SDL_FPoint) {
             .x = 0.0f,
             .y = 0.0f,
@@ -140,7 +140,7 @@ void fpscounter_update (struct fpscounter * self, const struct timings * timings
     int64_t tnow = timings_get_frame_timestamp(timings);
     if (tnow > self->texpires) {
         int fps = (int) (1.0f / timings_get_frame_duration(timings));
-        SDL_snprintf(&self->text[0], 10, "%5d", fps);
+        SDL_snprintf(&self->text[0], 24, "%d FPS", fps);
         self->texpires = tnow + self->interval;
     }
 }
