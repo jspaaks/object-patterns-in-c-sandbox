@@ -141,7 +141,8 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     self->state = MBM_GAME_STATE_PLAYING;
 
     // initialize vsync
-    self->vsync_enabled = false;
+    self->vsync_enabled = true;
+    SDL_SetRenderVSync(renderer, self->vsync_enabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED);
 
     // initialize the background
     self->background = background_new();
