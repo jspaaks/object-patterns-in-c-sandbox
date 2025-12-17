@@ -100,4 +100,5 @@ TODO
   display of fpscounter
 - look into gamestate-specific event handling
 - look into offscreen rendering for tests
+- look into https://wiki.libsdl.org/SDL3/SDL_GetRectIntersection for collisions
 -->
