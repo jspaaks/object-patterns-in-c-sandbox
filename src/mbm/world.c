@@ -182,7 +182,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     load_tile_map("../share/mbm/assets/tilemaps/level1.idx", nrows, ncols, tile_types[0]);
 
     *self = (struct world) {
-        .gravity = 150.0f,
+        .gravity = 10.0f,
         .h = dims->wld.h,
         .ncols = ncols,
         .nrows = nrows,
