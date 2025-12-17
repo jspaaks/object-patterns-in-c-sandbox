@@ -72,7 +72,7 @@ SDL_AppResult SDL_AppInit(void ** appstate_vpp, int argc, char * argv[]) {
             .h = 2 * 9 * 32,
             .w = 2 * 21 * 32,
         },
-        .world = {
+        .wld = {
             .h = 9 * 32,
             .w = 30 * 32,
         }

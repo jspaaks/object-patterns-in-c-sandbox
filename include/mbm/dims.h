@@ -17,7 +17,7 @@ struct dims {
     struct {
         int h;
         int w;
-    } world;
+    } wld;
 };
 
 #endif

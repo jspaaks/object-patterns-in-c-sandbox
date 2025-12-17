@@ -170,7 +170,7 @@ float world_get_gravity (const struct world * self) {
 
 void world_init (struct world * self, SDL_Renderer * renderer, const struct dims * dims) {
     int nrows = dims->view.h / dims->tile.h;
-    int ncols = dims->world.w / dims->tile.w;
+    int ncols = dims->wld.w / dims->tile.w;
 
     // load the tile index into a texture 
     SDL_Texture * texture = load_tile_texture("../share/mbm/assets/images/tiles.bmp", renderer);
@@ -183,7 +183,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
 
     *self = (struct world) {
         .gravity = 150.0f,
-        .h = dims->world.h,
+        .h = dims->wld.h,
         .ncols = ncols,
         .nrows = nrows,
         .tile = {
@@ -219,7 +219,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
             .x = 0.0f,
             .y = 0.0f,
         },
-        .w = dims->world.w,
+        .w = dims->wld.w,
     };
 }
 

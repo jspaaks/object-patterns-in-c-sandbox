@@ -116,7 +116,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
             .h = 32.0f,
             .w = 32.0f,
             .x = 100.0f,
-            .y = dims->world.h - 32.0f - 32.0f - 100.0f,
+            .y = dims->wld.h - dims->tile.h - h,
         },
     };
 }
