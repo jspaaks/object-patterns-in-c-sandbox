@@ -175,7 +175,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
     // load the tile index into a texture 
     SDL_Texture * texture = load_tile_texture("../share/mbm/assets/images/tiles.bmp", renderer);
 
-    // allocate memory for accessing the tiles consecutively and by row/col; 
+    // allocate memory for accessing the tiles consecutively and by row/col
     TileType ** tile_types = allocate_tiles(nrows, ncols);
 
     // initialize a tile pattern by loading from file
