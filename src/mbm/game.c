@@ -24,17 +24,21 @@ typedef void (*DrawFunction)(const struct game * game, SDL_Renderer * renderer);
 typedef SDL_AppResult (*HandleEventFunction)(struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
 typedef void (*UpdateFunction)(struct game * game, const struct timings * timings);
 
+struct delegation_functions {
+    DrawFunction draw;
+    HandleEventFunction handle_event;
+    UpdateFunction update;
+};
+
 // declare properties of `struct game`
 struct game {
     struct background * background;
-    DrawFunction draw_functions[MBM_GAME_STATE_LEN];
     struct duck * duck;
     struct fpscounter * fpscounter;
-    HandleEventFunction handle_event_functions[MBM_GAME_STATE_LEN];
+    struct delegation_functions delegated_functions[MBM_GAME_STATE_LEN];
     State state;
     bool vsync_enabled;
     struct world * world;
-    UpdateFunction update_functions[MBM_GAME_STATE_LEN];
 };
 
 // define pointer to singleton instance of `struct game`
@@ -64,7 +68,7 @@ void game_delete (struct game ** self) {
 }
 
 void game_draw (const struct game * self, SDL_Renderer * renderer) {
-    self->draw_functions[self->state](self, renderer);
+    self->delegated_functions[self->state].draw(self, renderer);
 }
 
     (void) self;
@@ -80,7 +84,7 @@ static void draw_playing (const struct game * self, SDL_Renderer * renderer) {
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
-    return self->handle_event_functions[self->state](self, renderer, event);
+    return self->delegated_functions[self->state].handle_event(self, renderer, event);
 }
 
     (void) self;
@@ -132,17 +136,19 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     // empty-initialize the singleton instance of `struct game`
     *self = (struct game) {};
 
-    // initialize the state-based indirection to static draw functions
-    self->draw_functions[MBM_GAME_STATE_PAUSED] = game_draw_paused;
-    self->draw_functions[MBM_GAME_STATE_PLAYING] = game_draw_playing;
+    // initialize the state-based indirection to static functions for game state 'paused'
+    self->delegated_functions[MBM_GAME_STATE_PAUSED] = (struct delegation_functions){
+        .draw = draw_paused,
+        .handle_event = handle_event_paused,
+        .update = update_paused,
+    };
 
-    // initialize the state-based indirection to static update functions
-    self->handle_event_functions[MBM_GAME_STATE_PAUSED] = game_handle_event_paused;
-    self->handle_event_functions[MBM_GAME_STATE_PLAYING] = game_handle_event_playing;
-
-    // initialize the state-based indirection to static update functions
-    self->update_functions[MBM_GAME_STATE_PAUSED] = game_update_paused;
-    self->update_functions[MBM_GAME_STATE_PLAYING] = game_update_playing;
+    // initialize the state-based indirection to static functions for game state 'playing'
+    self->delegated_functions[MBM_GAME_STATE_PLAYING] = (struct delegation_functions){
+        .draw = draw_playing,
+        .handle_event = handle_event_playing,
+        .update = update_playing,
+    };
 
     // initialize the gamestate
     self->state = MBM_GAME_STATE_PLAYING;
