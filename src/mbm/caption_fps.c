@@ -1,4 +1,4 @@
-#include "mbm/fpscounter.h"
+#include "mbm/caption_fps.h"      // struct caption_fps and associated functions
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "SDL3/SDL_error.h"       // SDL_GetError
 #include "SDL3/SDL_log.h"         // SDL_LogCritical
@@ -11,8 +11,8 @@
 #include <stdint.h>               // int64_t
 #include <stdlib.h>               // exit
 
-// declare properties of `struct fpscounter`
-struct fpscounter {
+// declare properties of `struct caption_fps`
+struct caption_fps {
     SDL_Color fgcolor;
     TTF_Font * font;
     bool is_on;
@@ -24,26 +24,26 @@ struct fpscounter {
     SDL_FPoint wld;
 };
 
-// define pointer to singleton instance of `struct fpscounter`
-static struct fpscounter * singleton = nullptr;
+// define pointer to singleton instance of `struct caption_fps`
+static struct caption_fps * singleton = nullptr;
 
 // forward function declarations
 static TTF_Font * load_font (const char * relpath, float ptsize);
 
-void fpscounter_delete (struct fpscounter ** self) {
+void caption_fps_delete (struct caption_fps ** self) {
     TTF_CloseFont((*self)->font);
     (*self)->font = nullptr;
     SDL_free(*self);
     *self = nullptr;
 }
 
-void fpscounter_draw (const struct fpscounter * self, SDL_Renderer * renderer) {
+void caption_fps_draw (const struct caption_fps * self, SDL_Renderer * renderer) {
     if (self->is_on) {
         // create surface from string
         SDL_Surface * surface = TTF_RenderText_Solid(self->font, self->text, 0, self->fgcolor);
         if (surface == nullptr) {
             SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                            "Couldn't create surface for fpscounter text, aborting; %s\n",
+                            "Couldn't create surface for caption_fps text, aborting; %s\n",
                             SDL_GetError());
             exit(1);
         }
@@ -52,7 +52,7 @@ void fpscounter_draw (const struct fpscounter * self, SDL_Renderer * renderer) {
         SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer, surface);
         if (texture == nullptr) {
             SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                            "Couldn't create texture for fpscounter text, aborting; %s\n",
+                            "Couldn't create texture for caption_fps text, aborting; %s\n",
                             SDL_GetError());
             exit(1);
         }
@@ -86,11 +86,11 @@ void fpscounter_draw (const struct fpscounter * self, SDL_Renderer * renderer) {
     }
 }
 
-void fpscounter_init (struct fpscounter * self) {
+void caption_fps_init (struct caption_fps * self) {
 
     float ptsize = 48.0f;
 
-    *self = (struct fpscounter) {
+    *self = (struct caption_fps) {
         .fgcolor = (SDL_Color) {
             .r = 255,
             .g = 255,
@@ -111,26 +111,26 @@ void fpscounter_init (struct fpscounter * self) {
     };
 }
 
-struct fpscounter * fpscounter_new (void) {
+struct caption_fps * caption_fps_new (void) {
     if (singleton != nullptr) {
         // memory has already been allocated for `singleton`
         return singleton;
     }
-    singleton = (struct fpscounter *) SDL_calloc(1, sizeof(struct fpscounter));
+    singleton = (struct caption_fps *) SDL_calloc(1, sizeof(struct caption_fps));
     if (singleton == nullptr) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
-                        "ERROR allocating dynamic memory for struct fpscounter, aborting; %s\n",
+                        "ERROR allocating dynamic memory for struct caption_fps, aborting; %s\n",
                         SDL_GetError());
         exit(1);
     }
     return singleton;
 }
 
-void fpscounter_toggle (struct fpscounter * self) {
+void caption_fps_toggle (struct caption_fps * self) {
     self->is_on = !self->is_on;
 }
 
-void fpscounter_update (struct fpscounter * self, const struct timings * timings) {
+void caption_fps_update (struct caption_fps * self, const struct timings * timings) {
     int64_t tnow = timings_get_frame_timestamp(timings);
     if (tnow > self->texpires) {
         int fps = (int) (1.0f / timings_get_frame_duration(timings));

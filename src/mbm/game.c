@@ -1,7 +1,7 @@
 #include "mbm/background.h"       // struct background and associated functions
+#include "mbm/caption_fps.h"      // struct caption_fps and associated functions
 #include "mbm/caption_paused.h"   // struct caption_paused and associated functions
 #include "mbm/duck.h"             // struct duck and associated functions
-#include "mbm/fpscounter.h"       // struct fpscounter and associated functions
 #include "mbm/game.h"             // struct game and associated functions
 #include "mbm/timings.h"          // struct timings and associated functions
 #include "mbm/world.h"            // struct world and associated functions
@@ -34,9 +34,9 @@ struct delegation_functions {
 // declare properties of `struct game`
 struct game {
     struct background * background;
+    struct caption_fps * caption_fps;
     struct caption_paused * caption_paused;
     struct duck * duck;
-    struct fpscounter * fpscounter;
     struct delegation_functions delegated_functions[MBM_GAME_STATE_LEN];
     State state;
     bool vsync_enabled;
@@ -62,7 +62,7 @@ void game_delete (struct game ** self) {
 
     // delegate freeing dynamically allocated memory to the respective objects
     caption_paused_delete(&(*self)->caption_paused);
-    fpscounter_delete(&(*self)->fpscounter);
+    caption_fps_delete(&(*self)->caption_fps);
     duck_delete(&(*self)->duck);
     background_delete(&(*self)->background);
     world_delete(&(*self)->world);
@@ -80,7 +80,7 @@ static void draw_paused (const struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
     world_draw(self->world, renderer);
     duck_draw(self->duck, renderer);
-    fpscounter_draw(self->fpscounter, renderer);
+    caption_fps_draw(self->caption_fps, renderer);
     caption_paused_draw(self->caption_paused, renderer);
 }
 
@@ -88,7 +88,7 @@ static void draw_playing (const struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
     world_draw(self->world, renderer);
     duck_draw(self->duck, renderer);
-    fpscounter_draw(self->fpscounter, renderer);
+    caption_fps_draw(self->caption_fps, renderer);
 }
 
 SDL_AppResult game_handle_event (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
@@ -107,7 +107,7 @@ static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * ren
         case SDLK_Q:
             return SDL_APP_SUCCESS;
         case SDLK_F:
-            fpscounter_toggle(self->fpscounter);
+            caption_fps_toggle(self->caption_fps);
             break;
         case SDLK_V:
             toggle_vsync(self, renderer);
@@ -130,7 +130,7 @@ static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * re
             duck_jump(self->duck);
             break;
         case SDLK_F:
-            fpscounter_toggle(self->fpscounter);
+            caption_fps_toggle(self->caption_fps);
             break;
         case SDLK_V:
             toggle_vsync(self, renderer);
@@ -178,9 +178,9 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     self->duck = duck_new();
     duck_init(self->duck, renderer, dims);
 
-    // initialize the fpscounter
-    self->fpscounter = fpscounter_new();
-    fpscounter_init(self->fpscounter);
+    // initialize the caption_fps
+    self->caption_fps = caption_fps_new();
+    caption_fps_init(self->caption_fps);
 
     // initialize the caption_paused
     self->caption_paused = caption_paused_new();
@@ -220,7 +220,7 @@ static void toggle_vsync (struct game * self, SDL_Renderer * renderer) {
 }
 
 static void update_paused (struct game * self, const struct timings * timings) {
-    fpscounter_update(self->fpscounter, timings);
+    caption_fps_update(self->caption_fps, timings);
 }
 
 static void update_playing (struct game * self, const struct timings * timings) {
@@ -235,7 +235,7 @@ static void update_playing (struct game * self, const struct timings * timings) 
     background_update(self->background, timings);
     world_update(self->world, timings);
     duck_update(self->duck, self->world, timings);
-    fpscounter_update(self->fpscounter, timings);
+    caption_fps_update(self->caption_fps, timings);
 
     duck_handle_collision_with_world(self->duck, self->world);
 }
