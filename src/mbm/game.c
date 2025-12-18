@@ -49,6 +49,8 @@ static void draw_paused (const struct game * self, SDL_Renderer * renderer);
 static void draw_playing (const struct game * self, SDL_Renderer * renderer);
 static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
 static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
+static void pause (struct game * self);
+static void play (struct game * self);
 static void toggle_vsync (struct game * self, SDL_Renderer * renderer);
 static void update_paused (struct game * self, const struct timings * timings);
 static void update_playing (struct game * self, const struct timings * timings);
@@ -71,9 +73,12 @@ void game_draw (const struct game * self, SDL_Renderer * renderer) {
     self->delegated_functions[self->state].draw(self, renderer);
 }
 
-    (void) self;
-    (void) renderer;
 static void draw_paused (const struct game * self, SDL_Renderer * renderer) {
+    background_draw(self->background, renderer);
+    world_draw(self->world, renderer);
+    duck_draw(self->duck, renderer);
+    fpscounter_draw(self->fpscounter, renderer);
+    caption_paused_draw(self->caption_paused, renderer);
 }
 
 static void draw_playing (const struct game * self, SDL_Renderer * renderer) {
@@ -87,8 +92,6 @@ SDL_AppResult game_handle_event (struct game * self, SDL_Renderer * renderer, co
     return self->delegated_functions[self->state].handle_event(self, renderer, event);
 }
 
-    (void) self;
-    (void) renderer;
 static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
     switch (event->type) {
     case SDL_EVENT_QUIT:
@@ -96,9 +99,13 @@ static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * ren
     case SDL_EVENT_KEY_DOWN:
         switch (event->key.key) {
         case SDLK_ESCAPE:
-            return SDL_APP_SUCCESS;
+            play(self);
+            break;
         case SDLK_Q:
             return SDL_APP_SUCCESS;
+        case SDLK_F:
+            fpscounter_toggle(self->fpscounter);
+            break;
         case SDLK_V:
             toggle_vsync(self, renderer);
             break;
@@ -114,12 +121,11 @@ static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * re
     case SDL_EVENT_KEY_DOWN:
         switch (event->key.key) {
         case SDLK_ESCAPE:
-            return SDL_APP_SUCCESS;
+            pause(self);
+            break;
         case SDLK_SPACE:
             duck_jump(self->duck);
             break;
-        case SDLK_Q:
-            return SDL_APP_SUCCESS;
         case SDLK_F:
             fpscounter_toggle(self->fpscounter);
             break;
@@ -197,13 +203,17 @@ static void pause (struct game * self) {
     self->state = MBM_GAME_STATE_PAUSED;
 }
 
-    (void) self;
-    (void) timings;
+static void play (struct game * self) {
+    self->state = MBM_GAME_STATE_PLAYING;
+}
+
 static void toggle_vsync (struct game * self, SDL_Renderer * renderer) {
     self->vsync_enabled = !self->vsync_enabled;
     SDL_SetRenderVSync(renderer, self->vsync_enabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED);
 }
+
 static void update_paused (struct game * self, const struct timings * timings) {
+    fpscounter_update(self->fpscounter, timings);
 }
 
 static void update_playing (struct game * self, const struct timings * timings) {
