@@ -202,10 +202,5 @@ static void game_update_playing (struct game * self, const struct timings * timi
     duck_update(self->duck, self->world, timings);
     fpscounter_update(self->fpscounter, timings);
 
-    SDL_FRect bbox_duck = duck_get_bbox(self->duck);
-    SDL_FRect bbox_world = world_get_bbox(self->world);
-    SDL_FRect bbox_overlap = {};
-    if (SDL_GetRectIntersectionFloat(&bbox_duck, &bbox_world, &bbox_overlap)) {
-        duck_translate_y(self->duck, -1 * bbox_overlap.h);
-    }
+    duck_handle_collision_with_world(self->duck, self->world);
 }

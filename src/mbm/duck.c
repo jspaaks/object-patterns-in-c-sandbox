@@ -69,8 +69,42 @@ void duck_draw (const struct duck * self, SDL_Renderer * renderer) {
 #endif // MBM_DRAW_BBOXES
 }
 
-SDL_FRect duck_get_bbox (const struct duck * self) {
-    return self->bbox;
+void duck_handle_collision_with_world (struct duck * self, const struct world * world) {
+    SDL_FRect bbox_world = world_get_bbox(world);
+    SDL_FRect overlap = {};
+    if (SDL_GetRectIntersectionFloat(&self->bbox, &bbox_world, &overlap) == false) return;
+    const float tol = 0.1f;
+    if (overlap.w > overlap.h) {
+        if (SDL_fabsf(overlap.y - bbox_world.y) < tol) {
+            // duck entered through top of world
+            self->pos.y -= overlap.h;
+            self->bbox.y -= overlap.h;
+            self->v.y.current = 0.0f;
+            return;
+        }
+        if (SDL_fabsf(overlap.y + overlap.h - bbox_world.h - bbox_world.y) < tol) {
+            // duck entered through bottom of world
+            self->pos.y += overlap.h;
+            self->bbox.y += overlap.h;
+            self->v.y.current = 0.0f;
+            return;
+        }
+    } else {
+        if (SDL_fabsf(overlap.x - bbox_world.x) < tol) {
+            // duck entered through left of world
+            self->pos.x -= overlap.w;
+            self->bbox.x -= overlap.w;
+            self->v.x.current = 0.0f;
+            return;
+        }
+        if (SDL_fabsf(overlap.x + overlap.w - bbox_world.w - bbox_world.x) < tol) {
+            // duck entered through right of world
+            self->pos.x += overlap.w;
+            self->bbox.x += overlap.w;
+            self->v.x.current = 0.0f;
+            return;
+        }
+    }
 }
 
 void duck_halt (struct duck * self) {
@@ -154,11 +188,6 @@ struct duck * duck_new (void) {
         exit(1);
     }
     return singleton;
-}
-
-void duck_translate_y (struct duck * self, float dy) {
-    self->pos.y += dy;
-    self->bbox.y += dy;
 }
 
 void duck_update (struct duck * self, const struct world * world, const struct timings * timings) {
