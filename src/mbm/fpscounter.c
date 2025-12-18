@@ -4,9 +4,10 @@
 #include "SDL3/SDL_log.h"         // SDL_LogCritical
 #include "SDL3/SDL_pixels.h"      // SDL_Color
 #include "SDL3/SDL_rect.h"        // SDL_FRect
-#include "SDL3/SDL_render.h"      // SDL_Renderer
+#include "SDL3/SDL_render.h"      // SDL_Renderer, SDL_Texture, SDL_RenderTexture
 #include "SDL3/SDL_stdinc.h"      // SDL_snprintf, SDL_free, SDL_calloc
-#include <SDL3_ttf/SDL_ttf.h>     // TTF_Font, TTF_OpenFont, TTF_CloseFont, TTF_RenderText_Shaded
+#include "SDL3/SDL_surface.h"     // SDL_surface
+#include <SDL3_ttf/SDL_ttf.h>     // TTF_Font, TTF_OpenFont, TTF_CloseFont, TTF_RenderText_Solid
 #include <stdint.h>               // int64_t
 #include <stdlib.h>               // exit
 
