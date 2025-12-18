@@ -137,6 +137,10 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
     };
 }
 
+void duck_jump (struct duck * self) {
+    self->v.y.current -= 10.0f;
+}
+
 struct duck * duck_new (void) {
     if (singleton != nullptr) {
         // memory has already been allocated for `singleton`

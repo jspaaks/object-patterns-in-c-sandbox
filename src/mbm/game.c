@@ -106,6 +106,9 @@ static SDL_AppResult game_handle_event_playing (struct game * self, SDL_Renderer
         switch (event->key.key) {
         case SDLK_ESCAPE:
             return SDL_APP_SUCCESS;
+        case SDLK_SPACE:
+            duck_jump(self->duck);
+            break;
         case SDLK_Q:
             return SDL_APP_SUCCESS;
         case SDLK_F:
