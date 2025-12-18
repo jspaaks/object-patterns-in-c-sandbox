@@ -41,12 +41,13 @@ struct game {
 static struct game * singleton = nullptr;
 
 // forward function declarations
-static void game_draw_paused (const struct game * self, SDL_Renderer * renderer);
-static void game_draw_playing (const struct game * self, SDL_Renderer * renderer);
-static SDL_AppResult game_handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
-static SDL_AppResult game_handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
-static void game_update_paused (struct game * self, const struct timings * timings);
-static void game_update_playing (struct game * self, const struct timings * timings);
+static void draw_paused (const struct game * self, SDL_Renderer * renderer);
+static void draw_playing (const struct game * self, SDL_Renderer * renderer);
+static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
+static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
+static void update_paused (struct game * self, const struct timings * timings);
+static void update_playing (struct game * self, const struct timings * timings);
+
 
 void game_delete (struct game ** self) {
 
@@ -65,12 +66,12 @@ void game_draw (const struct game * self, SDL_Renderer * renderer) {
     self->draw_functions[self->state](self, renderer);
 }
 
-static void game_draw_paused (const struct game * self, SDL_Renderer * renderer) {
     (void) self;
     (void) renderer;
+static void draw_paused (const struct game * self, SDL_Renderer * renderer) {
 }
 
-static void game_draw_playing (const struct game * self, SDL_Renderer * renderer) {
+static void draw_playing (const struct game * self, SDL_Renderer * renderer) {
     background_draw(self->background, renderer);
     world_draw(self->world, renderer);
     duck_draw(self->duck, renderer);
@@ -81,9 +82,9 @@ SDL_AppResult game_handle_event (struct game * self, SDL_Renderer * renderer, co
     return self->handle_event_functions[self->state](self, renderer, event);
 }
 
-static SDL_AppResult game_handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
     (void) self;
     (void) renderer;
+static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
     switch (event->type) {
     case SDL_EVENT_QUIT:
         return SDL_APP_SUCCESS;
@@ -98,7 +99,7 @@ static SDL_AppResult game_handle_event_paused (struct game * self, SDL_Renderer 
     return SDL_APP_CONTINUE;
 }
 
-static SDL_AppResult game_handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
+static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event) {
     switch (event->type) {
     case SDL_EVENT_QUIT:
         return SDL_APP_SUCCESS;
@@ -180,15 +181,19 @@ struct game * game_new (void) {
 }
 
 void game_update (struct game * self, const struct timings * timings) {
-    self->update_functions[self->state](self, timings);
+    self->delegated_functions[self->state].update(self, timings);
 }
 
-static void game_update_paused (struct game * self, const struct timings * timings) {
+static void pause (struct game * self) {
+    self->state = MBM_GAME_STATE_PAUSED;
+}
+
     (void) self;
     (void) timings;
+static void update_paused (struct game * self, const struct timings * timings) {
 }
 
-static void game_update_playing (struct game * self, const struct timings * timings) {
+static void update_playing (struct game * self, const struct timings * timings) {
     duck_halt(self->duck);
     const bool * key_states = SDL_GetKeyboardState(nullptr);
     if (key_states[SDL_SCANCODE_LEFT]) {
