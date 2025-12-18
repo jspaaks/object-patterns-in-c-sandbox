@@ -86,8 +86,8 @@ void duck_halt (struct duck * self) {
 void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims * dims) {
     float h = 32.0f;
     float w = 32.0f;
-    float x = 14 * dims->tile.w;
-    float y = dims->wld.h - 6 * dims->tile.h - h;
+    float x = 15 * dims->tile.w;
+    float y = 4 * dims->tile.h; //dims->wld.h - 6 * dims->tile.h - h;
     int nanims_cap = 2;
     int nframes_cap = 6;
     const char * relpath = "../share/mbm/assets/images/duck.bmp";
@@ -107,10 +107,10 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
         .anim_phase_shift = (int64_t) 0,
         .animations = animations,
         .bbox = (SDL_FRect) {
-            .h = h - 8.0f,
-            .w = w - 6.0f,
-            .x = x + 2.0f,
-            .y = y + 8.0f,
+            .h = h - 9.0f,
+            .w = w - 24.0f,
+            .x = x + 12.0f,
+            .y = y + 9.0f,
         },
         .ianim = ANIMATION_STATE_IDLE,
         .iframe = 0,
@@ -126,7 +126,7 @@ void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims *
             }
         },
         .vmax = {
-            .y = 100.0f,
+            .y = 250.0f,
         },
         .pos = (SDL_FRect) {
             .h = h,
