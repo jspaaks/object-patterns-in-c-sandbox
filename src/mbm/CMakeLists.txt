@@ -65,6 +65,7 @@ target_sources(
     PRIVATE
         animations.c
         background.c
+        caption_paused.c
         duck.c
         fpscounter.c
         game.c
@@ -78,6 +79,7 @@ target_sources(
                 ${CMAKE_BINARY_DIR}/include  # contains cmake-generated file
             FILES
                 ../../include/mbm/background.h
+                ../../include/mbm/caption_paused.h
                 ../../include/mbm/duck.h
                 ../../include/mbm/game.h
                 ../../include/mbm/timings.h

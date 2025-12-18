@@ -1,4 +1,5 @@
 #include "mbm/background.h"       // struct background and associated functions
+#include "mbm/caption_paused.h"   // struct caption_paused and associated functions
 #include "mbm/duck.h"             // struct duck and associated functions
 #include "mbm/fpscounter.h"       // struct fpscounter and associated functions
 #include "mbm/game.h"             // struct game and associated functions
@@ -33,6 +34,7 @@ struct delegation_functions {
 // declare properties of `struct game`
 struct game {
     struct background * background;
+    struct caption_paused * caption_paused;
     struct duck * duck;
     struct fpscounter * fpscounter;
     struct delegation_functions delegated_functions[MBM_GAME_STATE_LEN];
@@ -59,6 +61,7 @@ static void update_playing (struct game * self, const struct timings * timings);
 void game_delete (struct game ** self) {
 
     // delegate freeing dynamically allocated memory to the respective objects
+    caption_paused_delete(&(*self)->caption_paused);
     fpscounter_delete(&(*self)->fpscounter);
     duck_delete(&(*self)->duck);
     background_delete(&(*self)->background);
@@ -178,6 +181,10 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     // initialize the fpscounter
     self->fpscounter = fpscounter_new();
     fpscounter_init(self->fpscounter);
+
+    // initialize the caption_paused
+    self->caption_paused = caption_paused_new();
+    caption_paused_init(self->caption_paused, renderer, dims);
 }
 
 struct game * game_new (void) {
