@@ -45,6 +45,7 @@ static void draw_paused (const struct game * self, SDL_Renderer * renderer);
 static void draw_playing (const struct game * self, SDL_Renderer * renderer);
 static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
 static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * renderer, const SDL_Event * event);
+static void toggle_vsync (struct game * self, SDL_Renderer * renderer);
 static void update_paused (struct game * self, const struct timings * timings);
 static void update_playing (struct game * self, const struct timings * timings);
 
@@ -94,6 +95,9 @@ static SDL_AppResult handle_event_paused (struct game * self, SDL_Renderer * ren
             return SDL_APP_SUCCESS;
         case SDLK_Q:
             return SDL_APP_SUCCESS;
+        case SDLK_V:
+            toggle_vsync(self, renderer);
+            break;
         }
     }
     return SDL_APP_CONTINUE;
@@ -116,8 +120,7 @@ static SDL_AppResult handle_event_playing (struct game * self, SDL_Renderer * re
             fpscounter_toggle(self->fpscounter);
             break;
         case SDLK_V:
-            self->vsync_enabled = !self->vsync_enabled;
-            SDL_SetRenderVSync(renderer, self->vsync_enabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED);
+            toggle_vsync(self, renderer);
             break;
         }
     }
@@ -144,9 +147,9 @@ void game_init (struct game * self, SDL_Renderer * renderer, const struct dims *
     // initialize the gamestate
     self->state = MBM_GAME_STATE_PLAYING;
 
-    // initialize vsync
-    self->vsync_enabled = true;
-    SDL_SetRenderVSync(renderer, self->vsync_enabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED);
+    // initialize vsync to false, then toggle it
+    self->vsync_enabled = false;
+    toggle_vsync(self, renderer);
 
     // initialize the background
     self->background = background_new();
@@ -190,6 +193,10 @@ static void pause (struct game * self) {
 
     (void) self;
     (void) timings;
+static void toggle_vsync (struct game * self, SDL_Renderer * renderer) {
+    self->vsync_enabled = !self->vsync_enabled;
+    SDL_SetRenderVSync(renderer, self->vsync_enabled ? SDL_RENDERER_VSYNC_ADAPTIVE : SDL_RENDERER_VSYNC_DISABLED);
+}
 static void update_paused (struct game * self, const struct timings * timings) {
 }
 
