@@ -12,8 +12,6 @@ struct duck;
 
 MBM_ABI void duck_delete (struct duck ** self);
 MBM_ABI void duck_draw (const struct duck * self, SDL_Renderer * renderer);
-MBM_ABI void duck_face_left (struct duck * self);
-MBM_ABI void duck_face_right (struct duck * self);
 MBM_ABI SDL_FRect duck_get_bbox (const struct duck * self);
 MBM_ABI void duck_halt (struct duck * self);
 MBM_ABI void duck_init (struct duck * self, SDL_Renderer * renderer, const struct dims * dims);
