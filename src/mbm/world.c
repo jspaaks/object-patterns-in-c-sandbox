@@ -197,7 +197,7 @@ void world_init (struct world * self, SDL_Renderer * renderer, const struct dims
             .x = 12 * dims->tile.w,
             .y = 5 * dims->tile.h,
         },
-        .gravity = 10.0f,
+        .gravity = 10.0f,  // pixels per s per s
         .h = dims->wld.h,
         .ncols = ncols,
         .nrows = nrows,
