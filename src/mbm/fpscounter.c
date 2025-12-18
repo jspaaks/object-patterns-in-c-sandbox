@@ -13,7 +13,6 @@
 
 // declare properties of `struct fpscounter`
 struct fpscounter {
-    SDL_Color bgcolor;
     SDL_Color fgcolor;
     TTF_Font * font;
     bool is_on;
@@ -33,7 +32,7 @@ static TTF_Font * load_font (const char * relpath, float ptsize);
 
 void fpscounter_delete (struct fpscounter ** self) {
     TTF_CloseFont((*self)->font);
-
+    (*self)->font = nullptr;
     SDL_free(*self);
     *self = nullptr;
 }
@@ -41,7 +40,7 @@ void fpscounter_delete (struct fpscounter ** self) {
 void fpscounter_draw (const struct fpscounter * self, SDL_Renderer * renderer) {
     if (self->is_on) {
         // create surface from string
-        SDL_Surface * surface = TTF_RenderText_Shaded(self->font, self->text, 0, self->fgcolor, self->bgcolor);
+        SDL_Surface * surface = TTF_RenderText_Solid(self->font, self->text, 0, self->fgcolor);
         if (surface == nullptr) {
             SDL_LogCritical(SDL_LOG_CATEGORY_ERROR,
                             "Couldn't create surface for fpscounter text, aborting; %s\n",
@@ -92,12 +91,6 @@ void fpscounter_init (struct fpscounter * self) {
     float ptsize = 48.0f;
 
     *self = (struct fpscounter) {
-        .bgcolor = (SDL_Color) {
-            .r = 0,
-            .g = 0,
-            .b = 0,
-            .a = SDL_ALPHA_TRANSPARENT,
-        },
         .fgcolor = (SDL_Color) {
             .r = 255,
             .g = 255,
